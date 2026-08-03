@@ -3,6 +3,7 @@ import React from "react";
 import { Composition } from "remotion";
 import { GoogleRankingHook } from "./compositions/GoogleRankingHook";
 import { GoogleRankingVsl } from "./compositions/GoogleRankingVsl";
+import { DpaTapFullVsl, FULL_DURATION } from "./compositions/DpaTapFullVsl";
 
 /** Paramètres imposés par le brief du hook. */
 export const HOOK = {
@@ -30,6 +31,19 @@ export const RemotionRoot: React.FC = () => {
         id="GoogleRankingVsl"
         component={GoogleRankingVsl}
         durationInFrames={VSL_DURATION}
+        fps={HOOK.fps}
+        width={HOOK.width}
+        height={HOOK.height}
+      />
+      {/*
+        Livrable complet : le hook Google, la rotation de sortie et le reel NFC
+        DPA TAP dans une seule timeline. `GoogleRankingHook` et
+        `GoogleRankingVsl` restent enregistrées au-dessus pour comparaison.
+      */}
+      <Composition
+        id="DpaTapFullVsl"
+        component={DpaTapFullVsl}
+        durationInFrames={FULL_DURATION}
         fps={HOOK.fps}
         width={HOOK.width}
         height={HOOK.height}
