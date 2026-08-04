@@ -13,6 +13,7 @@
  */
 
 import React from "react";
+import { interpolateColors } from "remotion";
 import { G, LAYOUT, TYPE, WEIGHT } from "../config/google-ui";
 import { FONT_FAMILY } from "../config/fonts";
 import type { Business } from "../data/businesses";
@@ -20,6 +21,34 @@ import { formatRating } from "../data/businesses";
 import { StarsRating } from "./StarsRating";
 import { BusinessPhotos } from "./BusinessPhotos";
 import { CalendarIcon, DirectionsIcon, PhoneIcon } from "./GoogleIcons";
+
+/* -------------------------------------------------------------------------- */
+/*  Géométrie du bloc « 5,0 · ★★★★★ · (1 k) »                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Décalage du haut de la ligne notée par rapport au bord haut de la fiche :
+ * séparateur (1) + padding haut (16) + hauteur du titre (48) + marge (8).
+ */
+export const RATING_ROW_TOP = 1 + LAYOUT.cardPaddingTop + 48 + 8;
+
+/** Hauteur de cette ligne. */
+export const RATING_ROW_HEIGHT = 38;
+
+/**
+ * Largeur de « 5,0 · ★★★★★ · (1 k) », catégorie exclue :
+ * 45 (note) + 10 + 144 (5 × 28 + 4 gouttières) + 10 + 66 = 275 px.
+ */
+export const RATING_BLOCK_WIDTH = 275;
+
+/** Centre de la rangée d'étoiles, en abscisse absolue dans la page. */
+export const RATING_STARS_CENTER_X = LAYOUT.pagePaddingX + 55 + 72;
+
+/** Agrandissement maximal du bloc noté quand il est mis en avant. */
+const RATING_FOCUS_SCALE = 0.14;
+
+/** Vert Google du renforcement, identique à celui de « Réputation ». */
+const FOCUS_GREEN = G.openGreen;
 
 /** Bouton pilule Google : bordure grise, icône bleue, libellé sombre. */
 const ActionButton: React.FC<{
@@ -104,6 +133,12 @@ export type BusinessCardProps = {
   /** 0 → 1 : le séparateur haut disparaît quand la fiche devient première. */
   separatorOpacity: number;
   zIndex: number;
+  /**
+   * 0 → 1 : mise en avant du seul bloc « note · étoiles · avis ».
+   * À 0 la fiche est strictement identique à sa version d'origine — le hook
+   * n'est donc modifié d'aucun pixel avant la séquence qui l'utilise.
+   */
+  ratingFocus?: number;
 };
 
 export const BusinessCard: React.FC<BusinessCardProps> = ({
@@ -116,8 +151,15 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({
   lift,
   separatorOpacity,
   zIndex,
+  ratingFocus = 0,
 }) => {
   const hasReviews = rating !== null && reviewLabel !== null;
+
+  /** Le reste de la fiche s'atténue légèrement pendant la mise en avant. */
+  const restOpacity = 1 - ratingFocus * 0.62;
+
+  /** Facteur d'agrandissement du bloc noté. */
+  const focusScale = 1 + ratingFocus * RATING_FOCUS_SCALE;
 
   return (
     <div
@@ -179,6 +221,7 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 lineHeight: 1.15,
+                opacity: restOpacity,
               }}
             >
               <span
@@ -196,7 +239,8 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({
             <div
               style={{
                 marginTop: 8,
-                height: 38,
+                height: RATING_ROW_HEIGHT,
+                position: "relative",
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
@@ -210,29 +254,98 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({
                 opacity: hasReviews ? ratingOpacity : 1,
               }}
             >
+              {/*
+                Surbrillance du seul bloc « note · étoiles · avis » : fond vert
+                très pâle, bordure verte épaisse et halo extérieur. Posée SOUS
+                le texte (zIndex 0 contre 1), elle ne voile jamais la note, les
+                étoiles ni le nombre d'avis. Elle grandit avec le bloc.
+              */}
+              {ratingFocus > 0 ? (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: -18,
+                    top: -14,
+                    width: RATING_BLOCK_WIDTH * focusScale + 36,
+                    height: RATING_ROW_HEIGHT * focusScale + 28,
+                    boxSizing: "border-box",
+                    borderRadius: 18,
+                    zIndex: 0,
+                    backgroundColor: `rgba(24,128,56,${0.1 * ratingFocus})`,
+                    border: `${3.5 * ratingFocus}px solid rgba(24,128,56,${
+                      0.85 * ratingFocus
+                    })`,
+                    boxShadow: `0 0 0 ${
+                      12 * ratingFocus
+                    }px rgba(24,128,56,0.12), 0 0 ${
+                      44 * ratingFocus
+                    }px ${10 * ratingFocus}px rgba(24,128,56,0.3)`,
+                    opacity: ratingFocus,
+                  }}
+                />
+              ) : null}
+
               {hasReviews ? (
                 <>
-                  <span>{formatRating(rating)}</span>
-                  <StarsRating
-                    progress={starProgress}
-                    size={28}
-                    idPrefix={business.id}
-                  />
-                  <span>{`(${reviewLabel})`}</span>
-                  <span>{`· ${business.category}`}</span>
+                  {/*
+                    Le bloc noté est isolé dans son propre conteneur : c'est
+                    LUI seul qui grossit, ancré à gauche, sans déplacer d'un
+                    pixel le reste de la fiche.
+                  */}
+                  <div
+                    style={{
+                      position: "relative",
+                      zIndex: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      transformOrigin: "left center",
+                      scale: focusScale.toString(),
+                      color: interpolateColors(
+                        ratingFocus,
+                        [0, 1],
+                        [G.textSecondary, FOCUS_GREEN],
+                      ),
+                    }}
+                  >
+                    <span>{formatRating(rating)}</span>
+                    <StarsRating
+                      progress={starProgress}
+                      size={28}
+                      idPrefix={business.id}
+                    />
+                    <span>{`(${reviewLabel})`}</span>
+                  </div>
+                  {/*
+                    La catégorie s'efface pendant la mise en avant : la ligne se
+                    réduit alors exactement à « 5,0 ★★★★★ (1 k) », sans le
+                    moindre chevauchement avec le halo.
+                  */}
+                  <span
+                    style={{
+                      position: "relative",
+                      zIndex: 1,
+                      opacity: 1 - ratingFocus,
+                      translate: `${
+                        RATING_BLOCK_WIDTH * (focusScale - 1)
+                      }px 0px`,
+                    }}
+                  >
+                    {`· ${business.category}`}
+                  </span>
                 </>
               ) : (
                 <span>{`Aucun avis · ${business.category}`}</span>
               )}
             </div>
 
-            <div style={{ marginTop: 6 }}>
+            <div style={{ marginTop: 6, opacity: restOpacity }}>
               <MetaLine height={34}>
                 {`${business.seniority} · ${business.zone}`}
               </MetaLine>
             </div>
 
-            <div style={{ marginTop: 6 }}>
+            <div style={{ marginTop: 6, opacity: restOpacity }}>
               <MetaLine height={34}>
                 <span
                   style={{ color: G.openGreen, fontWeight: WEIGHT.medium }}
@@ -244,7 +357,9 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({
             </div>
           </div>
 
-          <BusinessPhotos src={business.photo} isOwner={business.isOwner} />
+          <div style={{ opacity: restOpacity, display: "flex" }}>
+            <BusinessPhotos src={business.photo} isOwner={business.isOwner} />
+          </div>
         </div>
 
         {/* Boutons d'action, ancrés au bas de la fiche */}
@@ -253,6 +368,7 @@ export const BusinessCard: React.FC<BusinessCardProps> = ({
             marginTop: "auto",
             display: "flex",
             gap: LAYOUT.actionButtonGap,
+            opacity: restOpacity,
           }}
         >
           <ActionButton label="Appeler" icon={<PhoneIcon size={30} />} />

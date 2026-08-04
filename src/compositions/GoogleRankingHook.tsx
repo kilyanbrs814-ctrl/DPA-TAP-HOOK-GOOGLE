@@ -51,7 +51,15 @@ const OVERTAKE_DURATION_PASSED = 12;
 /** Ressort de glissement : ferme, sans rebond ni tremblement. */
 const SLIDE_SPRING = { damping: 200, mass: 0.7, stiffness: 110 };
 
-export const GoogleRankingHook: React.FC = () => {
+export const GoogleRankingHook: React.FC<{
+  /**
+   * 0 → 1 : mise en avant du bloc « note · étoiles · avis » de la fiche
+   * « Votre établissement », pilotée par la séquence qui suit le hook.
+   * Non fournie (donc 0) dans la composition `GoogleRankingHook` elle-même :
+   * les 120 frames validées restent strictement inchangées.
+   */
+  readonly ratingFocus?: number;
+}> = ({ ratingFocus = 0 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -214,6 +222,8 @@ export const GoogleRankingHook: React.FC = () => {
                 extrapolateRight: "clamp",
               })}
               zIndex={isOwner ? 10 : 1}
+              // Seule la fiche de l'établissement suivi est mise en avant.
+              ratingFocus={isOwner ? ratingFocus : 0}
             />
           );
         })}

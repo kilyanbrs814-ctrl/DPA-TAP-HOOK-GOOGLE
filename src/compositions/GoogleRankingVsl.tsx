@@ -25,7 +25,20 @@ import {
 } from "remotion";
 import { G, LAYOUT } from "../config/google-ui";
 import { GoogleRankingHook } from "./GoogleRankingHook";
-import { CriteriaDiagram } from "../components/CriteriaDiagram";
+import { CriteriaDiagram, reviewFocus } from "../components/CriteriaDiagram";
+import { ReviewFlow } from "../components/ReviewFlow";
+
+/**
+ * Durée totale de la composition — UNIQUE source de vérité.
+ * Root.tsx et DpaTapFullVsl importent cette constante, personne ne la recopie.
+ *
+ *   0 → 119    le hook validé ;
+ *   120 → 348  défilement, voiles, arbre des trois critères, « Réputation »
+ *              passe au vert ;
+ *   350 → 470  séquence muette « avis Google → réputation » (ReviewFlow) ;
+ *   471 → 477  temps de pose sur l'image renforcée, avant le swipe NFC.
+ */
+export const GOOGLE_VSL_DURATION = 478;
 
 /** Dernière frame du hook validé. La suite commence juste après. */
 export const HOOK_END_FRAME = 120;
@@ -95,9 +108,13 @@ export const GoogleRankingVsl: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: G.white }}>
-      {/* La page Google, inchangée, simplement déplacée en bloc */}
+      {/*
+        La page Google, inchangée, simplement déplacée en bloc. `ratingFocus`
+        vaut 0 jusqu'à la frame 352 : le hook et toute la montée en première
+        place restent rigoureusement identiques.
+      */}
       <AbsoluteFill style={{ translate: `0px ${scrollY}px` }}>
-        <GoogleRankingHook />
+        <GoogleRankingHook ratingFocus={reviewFocus(frame)} />
       </AbsoluteFill>
 
       {/*
@@ -138,6 +155,14 @@ export const GoogleRankingVsl: React.FC = () => {
           opacity: competitorsVeil,
         }}
       />
+
+      {/*
+        Flux d'avis : trois vrais avis Google partent du bloc noté de la fiche
+        et remontent vers la branche verte. Rendu AVANT le diagramme : chaque
+        avis glisse donc sous la pastille « Réputation » et s'y absorbe, sans
+        jamais masquer ni la branche, ni le libellé.
+      */}
+      <ReviewFlow originY={cardTop} />
 
       {/* Trait, branches et critères */}
       <CriteriaDiagram originY={cardTop} />

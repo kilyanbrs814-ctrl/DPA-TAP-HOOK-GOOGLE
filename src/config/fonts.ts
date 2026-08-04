@@ -6,8 +6,9 @@
 
 import { loadFont } from "@remotion/google-fonts/Roboto";
 
+// 700 : réservé au nom de l'auteur et au badge « NOUVEAU » des avis Google.
 const { fontFamily } = loadFont("normal", {
-  weights: ["400", "500"],
+  weights: ["400", "500", "700"],
   subsets: ["latin", "latin-ext"],
 });
 

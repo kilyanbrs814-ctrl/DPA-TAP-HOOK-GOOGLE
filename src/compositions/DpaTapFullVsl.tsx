@@ -1,14 +1,15 @@
 /**
  * DpaTapFullVsl — le film complet, d'un seul tenant.
  *
- *   frames 0 → 399    le hook Google (`GoogleRankingVsl`), strictement intact ;
- *   frames 400 → 421  swipe horizontal : la page Google sort par la gauche
+ *   frames 0 → 477    le hook Google (`GoogleRankingVsl`), séquence « avis
+ *                     Google → réputation » comprise ;
+ *   frames 478 → 499  swipe horizontal : la page Google sort par la gauche
  *                     pendant que la scène DPA entre par la droite ;
- *   frames 422 → 702  le reel NFC occupe tout le cadre et continue ;
- *   frames 703 → 724  second swipe, identique au premier : l'écran « +1 avis »
+ *   frames 500 → 780  le reel NFC occupe tout le cadre et continue ;
+ *   frames 781 → 802  second swipe, identique au premier : l'écran « +1 avis »
  *                     sort par la gauche, la page de présentation entre par la
  *                     droite ;
- *   frames 725 → 882  la scène commerciale, stable, jusqu'à la dernière frame.
+ *   frames 803 → 960  la scène commerciale, stable, jusqu'à la dernière frame.
  *
  * Rien n'est pré-rendu : les deux motion designs sont montés comme composants
  * React et partagent la même timeline Remotion. Aucune balise <Video>, aucun
@@ -35,10 +36,14 @@ import { G } from "../config/google-ui";
 import { DpaTapReelBlue } from "../dpa/DpaTapReelBlue";
 import { DURATION_IN_FRAMES } from "../dpa/constants";
 import { DpaSalesEndScene, SALES_END_DURATION } from "./DpaSalesEndScene";
-import { GoogleRankingVsl } from "./GoogleRankingVsl";
+import { GOOGLE_VSL_DURATION, GoogleRankingVsl } from "./GoogleRankingVsl";
 
-/** Durée du hook Google. Sa dernière image visible est la frame 399. */
-export const GOOGLE_VSL_DURATION = 400;
+/**
+ * Durée du hook Google. Sa dernière image visible est la frame 477.
+ * La valeur est définie une seule fois, dans `GoogleRankingVsl` ; elle est
+ * simplement réexportée ici pour les consommateurs historiques.
+ */
+export { GOOGLE_VSL_DURATION };
 
 /** Durée du swipe : 22 frames ≈ 0,73 s à 30 fps. */
 export const SWIPE_DURATION = 22;
@@ -54,7 +59,7 @@ export const SWIPE_DURATION = 22;
  */
 export const DPA_START = GOOGLE_VSL_DURATION;
 
-/** Fin du film d'origine : hook + swipe + reel NFC, dernière frame 702. */
+/** Fin du film d'origine : hook + swipe + reel NFC, dernière frame 780. */
 export const CORE_DURATION = DPA_START + DURATION_IN_FRAMES;
 
 /** Durée totale, calculée — jamais écrite en dur. */
@@ -149,13 +154,13 @@ export const DpaTapFullVsl: React.FC = () => {
     <AbsoluteFill style={{ backgroundColor: G.white }}>
       <Sequence
         durationInFrames={GOOGLE_VSL_DURATION}
-        name="Hook Google (0-399)"
+        name="Hook Google + flux d'avis (0-477)"
       >
         <GoogleRankingVsl />
       </Sequence>
 
       {/*
-        Swipe + reel NFC. La frame interne repart de 0 à la frame globale 400,
+        Swipe + reel NFC. La frame interne repart de 0 à la frame globale 478,
         donc tous les `T.*`, les sons et les animations restent synchronisés
         entre eux. `premountFor` monte la séquence 30 frames plus tôt, invisible :
         le GLB de la plaque, les captures d'écran et les .wav sont déjà chargés
@@ -165,7 +170,7 @@ export const DpaTapFullVsl: React.FC = () => {
         from={DPA_START}
         durationInFrames={DURATION_IN_FRAMES}
         premountFor={30}
-        name="Swipe horizontal + DPA TAP (400+)"
+        name="Swipe horizontal + DPA TAP (478+)"
       >
         <HorizontalSwipe
           outgoing={
@@ -181,14 +186,14 @@ export const DpaTapFullVsl: React.FC = () => {
         Seconde jonction, rigoureusement identique à la première : l'écran
         « +1 avis » — le reel gelé sur sa dernière frame — sort par la gauche
         pendant que la page de présentation entre par la droite. À la frame
-        globale 703 la piste est encore à `translateX(0)`, l'image est donc
-        exactement celle de la frame 702.
+        globale 781 la piste est encore à `translateX(0)`, l'image est donc
+        exactement celle de la frame 780.
       */}
       <Sequence
         from={CORE_DURATION}
         durationInFrames={SALES_END_DURATION}
         premountFor={30}
-        name="Swipe horizontal + Présentation DPA TAP (703+)"
+        name="Swipe horizontal + Présentation DPA TAP (781+)"
       >
         <HorizontalSwipe
           outgoing={

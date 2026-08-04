@@ -2,7 +2,10 @@ import "./index.css";
 import React from "react";
 import { Composition } from "remotion";
 import { GoogleRankingHook } from "./compositions/GoogleRankingHook";
-import { GoogleRankingVsl } from "./compositions/GoogleRankingVsl";
+import {
+  GOOGLE_VSL_DURATION,
+  GoogleRankingVsl,
+} from "./compositions/GoogleRankingVsl";
 import { DpaTapFullVsl, FULL_DURATION } from "./compositions/DpaTapFullVsl";
 
 /** Paramètres imposés par le brief du hook. */
@@ -12,9 +15,6 @@ export const HOOK = {
   height: 1920,
   durationInFrames: 120,
 } as const;
-
-/** Hook (120 frames) + séquence des trois critères. */
-const VSL_DURATION = 400;
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -30,7 +30,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="GoogleRankingVsl"
         component={GoogleRankingVsl}
-        durationInFrames={VSL_DURATION}
+        durationInFrames={GOOGLE_VSL_DURATION}
         fps={HOOK.fps}
         width={HOOK.width}
         height={HOOK.height}

@@ -43,6 +43,22 @@ const CHIP_WIDTH = 300;
 /** Centres des trois colonnes. */
 const COLUMNS = [210, 540, 870] as const;
 
+/**
+ * Géométrie exportée : la séquence « avis → réputation » (ReviewFlow) vise la
+ * branche verte, elle doit connaître exactement où elle arrive. Une seule
+ * source de vérité, aucune coordonnée recopiée à la main.
+ */
+export const DIAGRAM_GEOMETRY = {
+  axisX: AXIS_X,
+  splitY: SPLIT_Y,
+  chipTop: CHIP_TOP,
+  chipBottom: CHIP_BOTTOM,
+  chipWidth: CHIP_WIDTH,
+  chipHeight: CHIP_HEIGHT,
+  /** Colonne de « Réputation » : cible du flux d'avis. */
+  reputationX: COLUMNS[2],
+} as const;
+
 /* -------------------------------------------------------------------------- */
 /*  Rythme (frames absolues de la composition)                                */
 /* -------------------------------------------------------------------------- */
@@ -61,6 +77,94 @@ export const CRITERIA_TIMING = {
   dimProximity: [298, 318] as const,
   reputation: [322, 348] as const,
 } as const;
+
+/* -------------------------------------------------------------------------- */
+/*  Séquence « avis Google → réputation » (après la mise en vert, frame 348)   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Rythme du flux d'avis, en frames absolues de la composition.
+ * Tout commence après la mise en vert complète de « Réputation » (348) et se
+ * termine à 470, suivi d'un temps de pose avant le swipe vers la plaque NFC.
+ */
+export const REVIEW_FLOW = {
+  /** Effacement des deux branches barrées : il ne reste que « Réputation ». */
+  fadeOthers: [350, 376] as const,
+  /** Mise en avant du bloc note · étoiles · avis de la fiche Google. */
+  highlight: [352, 382] as const,
+  /** Départ de chacun des trois avis Google depuis la fiche. */
+  cardStarts: [364, 396, 428] as const,
+  /** Trajet d'un avis, de la fiche jusqu'à la branche verte. */
+  cardTravel: 30,
+  /** Durée du renforcement déclenché par un avis qui arrive. */
+  impact: 12,
+} as const;
+
+/** Frames d'arrivée des avis sur la branche verte : 394, 426, 458. */
+export const REVIEW_ARRIVALS = REVIEW_FLOW.cardStarts.map(
+  (start) => start + REVIEW_FLOW.cardTravel,
+);
+
+/** Dernière frame animée de la séquence : 422 + 12 = 434. */
+export const REVIEW_FLOW_END =
+  REVIEW_ARRIVALS[REVIEW_ARRIVALS.length - 1] + REVIEW_FLOW.impact;
+
+/** Courbe 0 → 1 → 0 d'un sursaut, centrée sur une frame d'arrivée. */
+const impulse = (frame: number, at: number, duration: number): number =>
+  interpolate(
+    frame,
+    [at, at + duration * 0.3, at + duration],
+    [0, 1, 0],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.inOut(Easing.quad),
+    },
+  );
+
+/** Sursaut le plus fort à cette frame, toutes cartes confondues (0 → 1). */
+export const reviewImpact = (frame: number): number =>
+  REVIEW_ARRIVALS.reduce(
+    (peak, at) => Math.max(peak, impulse(frame, at, REVIEW_FLOW.impact)),
+    0,
+  );
+
+/**
+ * 0 → 1 : mise en avant du bloc « note · étoiles · avis » de la fiche Google.
+ * Source unique, partagée par la fiche (qui grossit) et par ReviewFlow (qui en
+ * fait partir les avis).
+ */
+export const reviewFocus = (frame: number): number =>
+  interpolate(
+    frame,
+    [REVIEW_FLOW.highlight[0], REVIEW_FLOW.highlight[1]],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.out(Easing.cubic),
+    },
+  );
+
+/** Sursaut au moment où un avis QUITTE la fiche Google (0 → 1). */
+export const reviewDeparture = (frame: number): number =>
+  REVIEW_FLOW.cardStarts.reduce(
+    (peak, at) => Math.max(peak, impulse(frame, at, 10)),
+    0,
+  );
+
+/** Renforcement cumulé de « Réputation » : une marche par carte reçue. */
+export const reviewStrength = (frame: number): number =>
+  REVIEW_ARRIVALS.reduce(
+    (total, at) =>
+      total +
+      interpolate(frame, [at, at + 10], [0, 1], {
+        extrapolateLeft: "clamp",
+        extrapolateRight: "clamp",
+        easing: Easing.out(Easing.cubic),
+      }),
+    0,
+  ) / REVIEW_ARRIVALS.length;
 
 const CRITERIA = [
   "Pertinence de la recherche",
@@ -119,6 +223,25 @@ export const CriteriaDiagram: React.FC<{
   const pulse =
     green * 0.012 * Math.sin((frame - T.reputation[1]) / 11) * (frame > T.reputation[1] ? 1 : 0);
 
+  /**
+   * Effacement des deux critères barrés : 1 tant que rien ne bouge, 0 une fois
+   * « Pertinence de la recherche » et « Proximité » entièrement dissoutes.
+   */
+  const others = interpolate(
+    frame,
+    [REVIEW_FLOW.fadeOthers[0], REVIEW_FLOW.fadeOthers[1]],
+    [1, 0],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: Easing.inOut(Easing.cubic),
+    },
+  );
+
+  /** Renforcement cumulé et sursaut ponctuel apportés par les avis reçus. */
+  const strength = reviewStrength(frame);
+  const impact = reviewImpact(frame);
+
   return (
     <svg
       viewBox={`0 0 ${FRAME_W} ${FRAME_H}`}
@@ -126,12 +249,16 @@ export const CriteriaDiagram: React.FC<{
       height={FRAME_H}
       style={{ position: "absolute", left: 0, top: 0 }}
     >
-      {/* Tronc : part du bord haut de la fiche */}
+      {/*
+        Tronc : part du bord haut de la fiche. Il vire progressivement au vert
+        au fil des avis reçus — c'est lui qui matérialise la connexion directe
+        « avis de la fiche Google → Réputation ».
+      */}
       <path
         d={`M${AXIS_X} ${originY} L ${AXIS_X} ${SPLIT_Y}`}
         fill="none"
-        stroke={LINE}
-        strokeWidth={3}
+        stroke={interpolateColors(strength, [0, 1], [LINE, GREEN])}
+        strokeWidth={3 + strength * 1.4}
         strokeLinecap="round"
         pathLength={1}
         strokeDasharray="1 1"
@@ -147,7 +274,7 @@ export const CriteriaDiagram: React.FC<{
           extrapolateRight: "clamp",
           easing: EASE_OUT,
         })}
-        fill={G.actionBlue}
+        fill={interpolateColors(strength, [0, 1], [G.actionBlue, GREEN])}
       />
 
       {/* Nœud de division */}
@@ -164,7 +291,35 @@ export const CriteriaDiagram: React.FC<{
             easing: EASE_OUT,
           },
         )}
-        fill={LINE}
+        fill={interpolateColors(strength, [0, 1], [LINE, GREEN])}
+      />
+
+      {/*
+        Lueur de la branche verte : un doublon large et translucide posé SOUS
+        la branche. Il gonfle à chaque carte d'avis reçue, puis retombe.
+      */}
+      <path
+        d={BRANCH_PATHS[2]}
+        fill="none"
+        stroke={GREEN}
+        strokeWidth={10 + impact * 12}
+        strokeLinecap="round"
+        opacity={strength * 0.1 + impact * 0.22}
+        pathLength={1}
+        strokeDasharray="1 1"
+        strokeDashoffset={
+          1 -
+          interpolate(
+            frame,
+            [T.branchStarts[2], T.branchStarts[2] + T.branchDuration],
+            [0, 1],
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: EASE_OUT,
+            },
+          )
+        }
       />
 
       {/* Trois branches */}
@@ -176,8 +331,12 @@ export const CriteriaDiagram: React.FC<{
           stroke={
             i === 2 ? interpolateColors(green, [0, 1], [LINE, GREEN]) : LINE
           }
-          strokeWidth={i === 2 ? 3 + green * 1.4 : 3}
+          strokeWidth={
+            i === 2 ? 3 + green * 1.4 + strength * 2 + impact * 1.4 : 3
+          }
           strokeLinecap="round"
+          // Les deux branches barrées s'effacent une fois « Réputation » verte.
+          opacity={i === 2 ? 1 : others}
           pathLength={1}
           strokeDasharray="1 1"
           strokeDashoffset={
@@ -195,6 +354,25 @@ export const CriteriaDiagram: React.FC<{
           }
         />
       ))}
+
+      {/*
+        Halo vert discret autour de « Réputation » : il apparaît à chaque
+        arrivée de carte et disparaît aussitôt. Posé avant les pastilles, il
+        reste donc derrière elles.
+      */}
+      {impact > 0 ? (
+        <rect
+          x={COLUMNS[2] - CHIP_WIDTH / 2 - (8 + impact * 26)}
+          y={CHIP_TOP - (8 + impact * 26)}
+          width={CHIP_WIDTH + 2 * (8 + impact * 26)}
+          height={CHIP_HEIGHT + 2 * (8 + impact * 26)}
+          rx={22 + impact * 20}
+          fill="none"
+          stroke={GREEN}
+          strokeWidth={2}
+          opacity={impact * 0.32}
+        />
+      ) : null}
 
       {/* Trois pastilles de critères */}
       {CRITERIA.map((label, i) => {
@@ -244,6 +422,11 @@ export const CriteriaDiagram: React.FC<{
 
         const g = isReputation ? green : 0;
 
+        /** Les critères barrés disparaissent ; « Réputation » se renforce. */
+        const fade = isReputation ? 1 : others;
+        const boost = isReputation ? strength : 0;
+        const hit = isReputation ? impact : 0;
+
         return (
           <foreignObject
             key={label}
@@ -275,12 +458,21 @@ export const CriteriaDiagram: React.FC<{
                   [0, 1],
                   [G.border, GREEN_BORDER],
                 )}`,
-                boxShadow: `0 2px 10px rgba(32,33,36,${0.07 * appear}), 0 0 0 ${
-                  10 * g
-                }px rgba(24,128,56,0.08)`,
-                opacity: appear * (1 - dim * 0.42),
-                translate: `0px ${(1 - appear) * 26}px`,
-                scale: (0.96 + appear * 0.04 + g * 0.045 + pulse).toString(),
+                boxShadow: `0 ${2 + boost * 8}px ${10 + boost * 20}px rgba(32,33,36,${
+                  (0.07 + boost * 0.06) * appear
+                }), 0 0 0 ${10 * g + 8 * boost + 16 * hit}px rgba(24,128,56,${
+                  0.08 + hit * 0.04
+                })`,
+                opacity: appear * (1 - dim * 0.42) * fade,
+                translate: `0px ${(1 - appear) * 26 + (1 - fade) * 18}px`,
+                scale: (
+                  0.96 +
+                  appear * 0.04 +
+                  g * 0.045 +
+                  pulse +
+                  boost * 0.055 +
+                  hit * 0.022
+                ).toString(),
               }}
             >
               {/*
