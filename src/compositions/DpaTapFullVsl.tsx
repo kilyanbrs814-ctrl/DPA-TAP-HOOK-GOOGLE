@@ -4,7 +4,11 @@
  *   frames 0 → 399    le hook Google (`GoogleRankingVsl`), strictement intact ;
  *   frames 400 → 421  swipe horizontal : la page Google sort par la gauche
  *                     pendant que la scène DPA entre par la droite ;
- *   frames 422 → …    le reel NFC occupe tout le cadre et continue.
+ *   frames 422 → 702  le reel NFC occupe tout le cadre et continue ;
+ *   frames 703 → 724  second swipe, identique au premier : l'écran « +1 avis »
+ *                     sort par la gauche, la page de présentation entre par la
+ *                     droite ;
+ *   frames 725 → 882  la scène commerciale, stable, jusqu'à la dernière frame.
  *
  * Rien n'est pré-rendu : les deux motion designs sont montés comme composants
  * React et partagent la même timeline Remotion. Aucune balise <Video>, aucun
@@ -30,6 +34,7 @@ import {
 import { G } from "../config/google-ui";
 import { DpaTapReelBlue } from "../dpa/DpaTapReelBlue";
 import { DURATION_IN_FRAMES } from "../dpa/constants";
+import { DpaSalesEndScene, SALES_END_DURATION } from "./DpaSalesEndScene";
 import { GoogleRankingVsl } from "./GoogleRankingVsl";
 
 /** Durée du hook Google. Sa dernière image visible est la frame 399. */
@@ -49,36 +54,44 @@ export const SWIPE_DURATION = 22;
  */
 export const DPA_START = GOOGLE_VSL_DURATION;
 
+/** Fin du film d'origine : hook + swipe + reel NFC, dernière frame 702. */
+export const CORE_DURATION = DPA_START + DURATION_IN_FRAMES;
+
 /** Durée totale, calculée — jamais écrite en dur. */
-export const FULL_DURATION = DPA_START + DURATION_IN_FRAMES;
+export const FULL_DURATION = CORE_DURATION + SALES_END_DURATION;
 
 /** Easing du swipe : départ doux, arrivée douce, aucun rebond. */
 const SWIPE_EASING = Easing.bezier(0.65, 0, 0.35, 1);
 
 /**
- * Le swipe horizontal, puis le reel.
+ * Le swipe horizontal, utilisé à l'identique aux deux jonctions du film.
  *
  * Une piste de deux panneaux de 1080 × 1920 collés l'un à l'autre :
  *
  *   ┌──────────────┬──────────────┐
- *   │  frame 399   │  DpaTapReel  │   piste : 2160 × 1920
- *   │  du hook,    │  Blue, en    │   translateX : 0 → -1080
- *   │  figée       │  lecture     │
+ *   │  scène qui   │  scène qui   │   piste : 2160 × 1920
+ *   │  sort, figée │  arrive, en  │   translateX : 0 → -1080
+ *   │              │  lecture     │
  *   └──────────────┴──────────────┘
  *   └── cadre ─────┘
  *
  * Le cadre (1080 × 1920, `overflow: hidden`) ne bouge pas ; seule la piste
- * translate. Le regard part donc vers la DROITE, du côté « Réputation » : le
- * contenu Google s'en va vers la gauche et la plaque arrive de la droite.
+ * translate. Le regard part donc toujours vers la DROITE : le contenu courant
+ * s'en va vers la gauche et le suivant arrive de la droite.
  *
- * `<Freeze frame={399}>` rend `GoogleRankingVsl` exactement dans l'état de sa
- * frame 399 : ce n'est pas une capture, c'est le même composant, gelé.
+ * Le panneau gauche reçoit un `<Freeze>` : ce n'est pas une capture, c'est le
+ * même composant, gelé sur sa dernière frame.
  * Ne pas retirer l'`<AbsoluteFill>` qui enveloppe la piste : posé directement
  * sous une `<Sequence from>`, un `<Freeze>` résout une frame erronée (la page
  * revient à un état antérieur, sans le critère « Réputation » en vert). Il lui
  * faut un niveau de séquence intermédiaire — ce qu'est une `<AbsoluteFill>`.
  */
-const HorizontalSwipe: React.FC = () => {
+const HorizontalSwipe: React.FC<{
+  /** Scène sortante, déjà enveloppée dans son `<Freeze>`. */
+  readonly outgoing: React.ReactNode;
+  /** Scène entrante, qui joue sa timeline locale dès la première frame. */
+  readonly incoming: React.ReactNode;
+}> = ({ outgoing, incoming }) => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
 
@@ -112,20 +125,15 @@ const HorizontalSwipe: React.FC = () => {
         {/*
           Panneau gauche. Il est démonté dès que la piste a fini sa course : à
           partir de là il est entièrement hors cadre, le garder monté ne ferait
-          que rejouer la page Google pour rien pendant 280 frames.
+          que rejouer la scène précédente pour rien pendant des centaines de
+          frames.
         */}
         {frame <= SWIPE_DURATION ? (
-          <div style={{ ...panel, left: 0 }}>
-            <Freeze frame={GOOGLE_VSL_DURATION - 1}>
-              <GoogleRankingVsl />
-            </Freeze>
-          </div>
+          <div style={{ ...panel, left: 0 }}>{outgoing}</div>
         ) : null}
 
         {/* Panneau droit : collé au précédent, sans le moindre espace. */}
-        <div style={{ ...panel, left: width }}>
-          <DpaTapReelBlue />
-        </div>
+        <div style={{ ...panel, left: width }}>{incoming}</div>
       </div>
     </AbsoluteFill>
   );
@@ -159,7 +167,37 @@ export const DpaTapFullVsl: React.FC = () => {
         premountFor={30}
         name="Swipe horizontal + DPA TAP (400+)"
       >
-        <HorizontalSwipe />
+        <HorizontalSwipe
+          outgoing={
+            <Freeze frame={GOOGLE_VSL_DURATION - 1}>
+              <GoogleRankingVsl />
+            </Freeze>
+          }
+          incoming={<DpaTapReelBlue />}
+        />
+      </Sequence>
+
+      {/*
+        Seconde jonction, rigoureusement identique à la première : l'écran
+        « +1 avis » — le reel gelé sur sa dernière frame — sort par la gauche
+        pendant que la page de présentation entre par la droite. À la frame
+        globale 703 la piste est encore à `translateX(0)`, l'image est donc
+        exactement celle de la frame 702.
+      */}
+      <Sequence
+        from={CORE_DURATION}
+        durationInFrames={SALES_END_DURATION}
+        premountFor={30}
+        name="Swipe horizontal + Présentation DPA TAP (703+)"
+      >
+        <HorizontalSwipe
+          outgoing={
+            <Freeze frame={DURATION_IN_FRAMES - 1}>
+              <DpaTapReelBlue />
+            </Freeze>
+          }
+          incoming={<DpaSalesEndScene />}
+        />
       </Sequence>
     </AbsoluteFill>
   );

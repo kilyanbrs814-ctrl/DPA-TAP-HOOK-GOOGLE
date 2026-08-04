@@ -289,13 +289,21 @@ export const FINAL_SCREEN = {
 } as const;
 
 /**
- * Seuls les fichiers réellement chargés par la séquence sont listés ici — et
- * ce sont exactement ceux qui ont été copiés dans `public/assets/`. Les entrées
- * mortes du projet d'origine (plaque-bleue.png, plaque-noire.png, logo-dpa.png,
- * capture-telephone.mp4) n'étaient référencées par aucun `staticFile()`.
+ * Seuls les fichiers réellement chargés sont listés ici — et ce sont exactement
+ * ceux qui ont été copiés dans `public/assets/`. Les entrées mortes du projet
+ * d'origine (logo-dpa.png, capture-telephone.mp4) n'étaient référencées par
+ * aucun `staticFile()`.
+ *
+ * `plaqueBluePng` / `plaqueBlackPng` sont les visuels détourés authentiques
+ * (1024 × 1024, RGBA, fond réellement transparent) et `logo` est le logotype
+ * officiel (1536 × 1024, RGBA, fond transparent). Ils ne servent pas au reel,
+ * qui utilise le modèle 3D, mais à la scène finale `DpaSalesEndScene`.
  */
 export const ASSETS = {
   plaqueGlb: "assets/plaque-bleue-3d.glb",
+  plaqueBluePng: "assets/plaque-bleue.png",
+  plaqueBlackPng: "assets/plaque-noire.png",
+  logo: "assets/logo-dpa.png",
   notification: "assets/notification-nfc.png",
   reviewPage: "assets/page-avis-google.png",
   finalScreen: "assets/ecran-final-plus-1-avis.png",
