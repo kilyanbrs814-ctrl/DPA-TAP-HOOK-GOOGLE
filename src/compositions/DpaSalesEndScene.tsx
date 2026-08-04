@@ -147,7 +147,7 @@ const ADVANTAGES = [
 ] as const;
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/*  Plaques — visuels détourés authentiques, échelle uniforme                 */
+/*  Plaques — un seul gabarit extérieur, deux designs intérieurs             */
 /* ────────────────────────────────────────────────────────────────────────── */
 
 /**
@@ -156,10 +156,9 @@ const ADVANTAGES = [
  * canevas de 1024 × 1024 px. Afficher simplement les deux canevas à la même
  * taille ferait donc paraître les produits différents.
  *
- * Chaque empreinte est normalisée dans le même rectangle d'affichage. La légère
- * correction de ratio compense la perspective différente des deux visuels et
- * restitue la taille physique commune des plaques 10 × 10 cm. Aucun pixel
- * n'est recadré.
+ * Chaque design est normalisé puis placé DANS le même masque extérieur. Ainsi,
+ * les dimensions, les coins et l'animation sont rigoureusement identiques au
+ * pixel près ; seule l'image visible à l'intérieur du gabarit change.
  */
 const PLAQUE_SOURCE = {
   black: {
@@ -178,38 +177,54 @@ const PLAQUE_SOURCE = {
   },
 } as const;
 
-/** Empreinte visible commune : même largeur, même hauteur, même ligne de base. */
-const PLAQUE_BODY = { width: 368, height: 350 } as const;
+/** Gabarit physique commun aux deux produits — source unique de leur forme. */
+const PLAQUE_FRAME = {
+  width: 368,
+  height: 350,
+  radius: 24,
+  centerY: 790,
+} as const;
 
 /**
  * Centres visibles : 48 px d'air entre les produits, et 148 px de marge entre
  * chaque plaque et le bord du cadre. Même au pic de l'animation, aucun produit
  * ne passe devant l'autre et aucun bord n'est masqué.
  */
-const PLAQUE_CENTER = {
-  black: { x: 332, y: 790 },
-  blue: { x: 748, y: 790 },
+const PLAQUE_CENTER_X = {
+  black: 332,
+  blue: 748,
 } as const;
 
-/** Place le canevas de façon que le CENTRE DE LA PLAQUE tombe sur `center`. */
-const plaqueLayout = (
+/** Place l'empreinte visible exactement bord à bord dans le masque commun. */
+const plaqueArtworkLayout = (
   source: (typeof PLAQUE_SOURCE)[keyof typeof PLAQUE_SOURCE],
-  center: { readonly x: number; readonly y: number },
 ) => {
-  const width = (PLAQUE_BODY.width * source.canvas) / source.bodyWidth;
-  const height = (PLAQUE_BODY.height * source.canvas) / source.bodyHeight;
+  const width = (PLAQUE_FRAME.width * source.canvas) / source.bodyWidth;
+  const height = (PLAQUE_FRAME.height * source.canvas) / source.bodyHeight;
   const scaleX = width / source.canvas;
   const scaleY = height / source.canvas;
   return {
     width,
     height,
-    left: center.x - source.bodyCenterX * scaleX,
-    top: center.y - source.bodyCenterY * scaleY,
+    left: PLAQUE_FRAME.width / 2 - source.bodyCenterX * scaleX,
+    top: PLAQUE_FRAME.height / 2 - source.bodyCenterY * scaleY,
   };
 };
 
-const BLACK_LAYOUT = plaqueLayout(PLAQUE_SOURCE.black, PLAQUE_CENTER.black);
-const BLUE_LAYOUT = plaqueLayout(PLAQUE_SOURCE.blue, PLAQUE_CENTER.blue);
+const PLAQUES = [
+  {
+    key: "black",
+    asset: ASSETS.plaqueBlackPng,
+    centerX: PLAQUE_CENTER_X.black,
+    artwork: plaqueArtworkLayout(PLAQUE_SOURCE.black),
+  },
+  {
+    key: "blue",
+    asset: ASSETS.plaqueBluePng,
+    centerX: PLAQUE_CENTER_X.blue,
+    artwork: plaqueArtworkLayout(PLAQUE_SOURCE.blue),
+  },
+] as const;
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /*  Logotype officiel                                                         */
@@ -255,8 +270,7 @@ export const DpaSalesEndScene: React.FC = () => {
 
   const title = reveal(frame, 18, 36);
   const subtitle = reveal(frame, 26, 44);
-  const black = reveal(frame, 28, 50);
-  const blue = reveal(frame, 32, 54);
+  const plaques = reveal(frame, 28, 50);
   const outro = reveal(frame, 68, 92);
 
   return (
@@ -305,42 +319,41 @@ export const DpaSalesEndScene: React.FC = () => {
         Un geste. Quelques secondes.
       </div>
 
-      {/* ── Plaque noire, à gauche ──────────────────────────────────────── */}
-      <Img
-        src={staticFile(ASSETS.plaqueBlackPng)}
-        style={{
-          position: "absolute",
-          left: BLACK_LAYOUT.left,
-          top: BLACK_LAYOUT.top,
-          width: BLACK_LAYOUT.width,
-          height: BLACK_LAYOUT.height,
-          maxWidth: "none",
-          borderRadius: 24,
-          opacity: black,
-          translate: lift(black, 26),
-          scale: interpolate(black, [0, 1], [0.95, 1], {
-            output: "perceptual-scale",
-          }),
-        }}
-      />
-
-      {/* ── Plaque bleue, à droite ──────────────────────────────────────── */}
-      <Img
-        src={staticFile(ASSETS.plaqueBluePng)}
-        style={{
-          position: "absolute",
-          left: BLUE_LAYOUT.left,
-          top: BLUE_LAYOUT.top,
-          width: BLUE_LAYOUT.width,
-          height: BLUE_LAYOUT.height,
-          maxWidth: "none",
-          opacity: blue,
-          translate: lift(blue, 26),
-          scale: interpolate(blue, [0, 1], [0.95, 1], {
-            output: "perceptual-scale",
-          }),
-        }}
-      />
+      {/*
+        Un masque absolument identique pour les deux plaques. Le wrapper est
+        la forme physique du produit ; l'<Img> interne n'est que son design.
+      */}
+      {PLAQUES.map((plaque) => (
+        <div
+          key={plaque.key}
+          style={{
+            position: "absolute",
+            left: plaque.centerX - PLAQUE_FRAME.width / 2,
+            top: PLAQUE_FRAME.centerY - PLAQUE_FRAME.height / 2,
+            width: PLAQUE_FRAME.width,
+            height: PLAQUE_FRAME.height,
+            borderRadius: PLAQUE_FRAME.radius,
+            overflow: "hidden",
+            opacity: plaques,
+            translate: lift(plaques, 26),
+            scale: interpolate(plaques, [0, 1], [0.95, 1], {
+              output: "perceptual-scale",
+            }),
+          }}
+        >
+          <Img
+            src={staticFile(plaque.asset)}
+            style={{
+              position: "absolute",
+              left: plaque.artwork.left,
+              top: plaque.artwork.top,
+              width: plaque.artwork.width,
+              height: plaque.artwork.height,
+              maxWidth: "none",
+            }}
+          />
+        </div>
+      ))}
 
       {/* ── Les quatre avantages, grille 2 × 2 ──────────────────────────── */}
       {ADVANTAGES.map((advantage, index) => {
