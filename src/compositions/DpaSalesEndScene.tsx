@@ -151,23 +151,23 @@ const ADVANTAGES = [
 /* ────────────────────────────────────────────────────────────────────────── */
 
 /**
- * Géométrie mesurée sur les deux fichiers. Les PNG ont le même canevas carré,
- * mais pas la même empreinte visible : 715 × 708 px pour la noire et
- * 750 × 693 px pour la bleue. Afficher simplement les deux canevas à la même
- * taille faisait donc paraître les produits différents.
+ * Géométrie mesurée sur les deux fichiers. Le nouveau visuel noir remplit son
+ * canevas 430 × 430 px, tandis que la plaque bleue occupe 750 × 693 px dans un
+ * canevas de 1024 × 1024 px. Afficher simplement les deux canevas à la même
+ * taille ferait donc paraître les produits différents.
  *
- * Chaque empreinte est normalisée dans le même rectangle d'affichage. La très
- * légère correction (moins de 4 % par axe par rapport au ratio moyen) compense
- * uniquement la perspective différente des deux photos et restitue la taille
- * physique commune des plaques 10 × 10 cm. Aucun pixel n'est recadré.
+ * Chaque empreinte est normalisée dans le même rectangle d'affichage. La légère
+ * correction de ratio compense la perspective différente des deux visuels et
+ * restitue la taille physique commune des plaques 10 × 10 cm. Aucun pixel
+ * n'est recadré.
  */
 const PLAQUE_SOURCE = {
   black: {
-    canvas: 1024,
-    bodyWidth: 715,
-    bodyHeight: 708,
-    bodyCenterX: 511,
-    bodyCenterY: 505.5,
+    canvas: 430,
+    bodyWidth: 430,
+    bodyHeight: 430,
+    bodyCenterX: 215,
+    bodyCenterY: 215,
   },
   blue: {
     canvas: 1024,
