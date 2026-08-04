@@ -7,9 +7,9 @@
  * logotype officiel, affiché en image et jamais réécrit avec une police.
  *
  * Les deux plaques sont les visuels détourés authentiques du dépôt d'assets,
- * posées côte à côte — la noire à gauche, la bleue à droite — à la même largeur
- * visible et à l'échelle uniforme de leur canevas carré 1024 × 1024 : aucun
- * étirement, aucune inclinaison, aucun texte ni logo retouché.
+ * posées côte à côte — la noire à gauche, la bleue à droite — dans deux
+ * empreintes produit strictement identiques. Elles ne se chevauchent jamais et
+ * restent entièrement dans la safe zone, y compris pendant leur apparition.
  *
  * Tout est piloté par `useCurrentFrame()` : aucune animation CSS temporelle.
  */
@@ -131,7 +131,7 @@ const IconDelivery: React.FC<{ readonly color: string }> = ({ color }) => (
 /* ────────────────────────────────────────────────────────────────────────── */
 
 const CARD = {
-  top: 1180,
+  top: 1070,
   width: (CONTENT_WIDTH - 24) / 2,
   height: 113,
   gapX: 24,
@@ -151,32 +151,44 @@ const ADVANTAGES = [
 /* ────────────────────────────────────────────────────────────────────────── */
 
 /**
- * Géométrie mesurée sur les deux fichiers. Le canevas est carré (1024 × 1024)
- * mais le corps de la plaque n'en occupe qu'une partie, et il n'y est pas
- * exactement centré. On pilote donc la LARGEUR VISIBLE de chaque plaque et la
- * position de son centre réel, plutôt qu'un canevas à moitié vide — c'est ce qui
- * garantit que les deux plaques lisent exactement à la même taille.
+ * Géométrie mesurée sur les deux fichiers. Les PNG ont le même canevas carré,
+ * mais pas la même empreinte visible : 715 × 708 px pour la noire et
+ * 750 × 693 px pour la bleue. Afficher simplement les deux canevas à la même
+ * taille faisait donc paraître les produits différents.
  *
- * Le canevas entier est toujours affiché à échelle uniforme : le rapport
- * d'origine du produit est conservé tel quel, rien n'est étiré ni recadré.
+ * Chaque empreinte est normalisée dans le même rectangle d'affichage. La très
+ * légère correction (moins de 4 % par axe par rapport au ratio moyen) compense
+ * uniquement la perspective différente des deux photos et restitue la taille
+ * physique commune des plaques 10 × 10 cm. Aucun pixel n'est recadré.
  */
 const PLAQUE_SOURCE = {
-  black: { canvas: 1024, bodyWidth: 715, bodyCenterX: 511, bodyCenterY: 505.5 },
-  blue: { canvas: 1024, bodyWidth: 750, bodyCenterX: 511, bodyCenterY: 497.5 },
+  black: {
+    canvas: 1024,
+    bodyWidth: 715,
+    bodyHeight: 708,
+    bodyCenterX: 511,
+    bodyCenterY: 505.5,
+  },
+  blue: {
+    canvas: 1024,
+    bodyWidth: 750,
+    bodyHeight: 693,
+    bodyCenterX: 511,
+    bodyCenterY: 497.5,
+  },
 } as const;
 
-/** Largeur visible imposée aux deux plaques : elles doivent lire identiques. */
-const PLAQUE_BODY_WIDTH = 380;
+/** Empreinte visible commune : même largeur, même hauteur, même ligne de base. */
+const PLAQUE_BODY = { width: 368, height: 350 } as const;
 
 /**
- * Centres visibles : la noire à gauche, la bleue à droite, sur la même ligne.
- * Écartement de 356 px pour 380 px de large, soit 24 px de recouvrement — 6,3 %
- * de la largeur, uniquement sur le bord intérieur. Les deux faces restent
- * lisibles, et l'ensemble (x 172 → 908) tient dans la safe zone latérale.
+ * Centres visibles : 48 px d'air entre les produits, et 148 px de marge entre
+ * chaque plaque et le bord du cadre. Même au pic de l'animation, aucun produit
+ * ne passe devant l'autre et aucun bord n'est masqué.
  */
 const PLAQUE_CENTER = {
-  black: { x: 362, y: 820 },
-  blue: { x: 718, y: 820 },
+  black: { x: 332, y: 790 },
+  blue: { x: 748, y: 790 },
 } as const;
 
 /** Place le canevas de façon que le CENTRE DE LA PLAQUE tombe sur `center`. */
@@ -184,12 +196,15 @@ const plaqueLayout = (
   source: (typeof PLAQUE_SOURCE)[keyof typeof PLAQUE_SOURCE],
   center: { readonly x: number; readonly y: number },
 ) => {
-  const size = (PLAQUE_BODY_WIDTH * source.canvas) / source.bodyWidth;
-  const scale = size / source.canvas;
+  const width = (PLAQUE_BODY.width * source.canvas) / source.bodyWidth;
+  const height = (PLAQUE_BODY.height * source.canvas) / source.bodyHeight;
+  const scaleX = width / source.canvas;
+  const scaleY = height / source.canvas;
   return {
-    size,
-    left: center.x - source.bodyCenterX * scale,
-    top: center.y - source.bodyCenterY * scale,
+    width,
+    height,
+    left: center.x - source.bodyCenterX * scaleX,
+    top: center.y - source.bodyCenterY * scaleY,
   };
 };
 
@@ -268,8 +283,8 @@ export const DpaSalesEndScene: React.FC = () => {
           translate: lift(title, 22),
         }}
       >
-        <div>Vos clients sont satisfaits.</div>
-        <div>Facilitez-leur le passage à l’avis.</div>
+        <div>Transformez chaque client satisfait</div>
+        <div>en nouvel avis Google.</div>
       </div>
 
       {/* ── Sous-titre ──────────────────────────────────────────────────── */}
@@ -297,8 +312,8 @@ export const DpaSalesEndScene: React.FC = () => {
           position: "absolute",
           left: BLACK_LAYOUT.left,
           top: BLACK_LAYOUT.top,
-          width: BLACK_LAYOUT.size,
-          height: BLACK_LAYOUT.size,
+          width: BLACK_LAYOUT.width,
+          height: BLACK_LAYOUT.height,
           maxWidth: "none",
           opacity: black,
           translate: lift(black, 26),
@@ -315,8 +330,8 @@ export const DpaSalesEndScene: React.FC = () => {
           position: "absolute",
           left: BLUE_LAYOUT.left,
           top: BLUE_LAYOUT.top,
-          width: BLUE_LAYOUT.size,
-          height: BLUE_LAYOUT.size,
+          width: BLUE_LAYOUT.width,
+          height: BLUE_LAYOUT.height,
           maxWidth: "none",
           opacity: blue,
           translate: lift(blue, 26),
