@@ -315,6 +315,7 @@ export const DpaSalesEndScene: React.FC = () => {
           width: BLACK_LAYOUT.width,
           height: BLACK_LAYOUT.height,
           maxWidth: "none",
+          borderRadius: 24,
           opacity: black,
           translate: lift(black, 26),
           scale: interpolate(black, [0, 1], [0.95, 1], {
