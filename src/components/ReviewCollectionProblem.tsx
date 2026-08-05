@@ -11,7 +11,9 @@
  *   3. le parcours classique pour déposer un avis : chercher, trouver la
  *      section des avis, rédiger et publier — trois étapes, uniquement des
  *      icônes ;
- *   4. le client va au bout et publie réellement son avis.
+ *   4. le client va au bout et publie réellement son avis ;
+ *   5. la conclusion révèle pourquoi ce parcours ne suffit pas : presque
+ *      personne ne pense à faire spontanément toutes ces étapes.
  *
  * Aucun pourcentage, aucune statistique : la difficulté se lit uniquement dans
  * les abandons et dans la longueur du parcours.
@@ -82,16 +84,18 @@ export const PROBLEM_TIMING = {
   review: [88, 104] as const,
   /** Effacement des profils, du parcours et de l'avis publié. */
   fadeOut: [124, 142] as const,
+  /** Conclusion commerciale, en frames absolues dans la scène. */
+  conclusionIn: [222, 242] as const,
 } as const;
 
 /**
  * Durée totale de la scène.
  *
  *   10 → 98    la question entre, reste lisible, puis s'efface ;
- *   92 → 234   le client apparaît, parcourt les trois étapes et publie.
+ *   92 → 234   le client apparaît, parcourt les trois étapes et publie ;
+ *   222 → 328  la conclusion explique pourquoi presque personne ne le fait.
  */
-export const PROBLEM_DURATION =
-  PROBLEM_TIMING.demoStart + PROBLEM_TIMING.fadeOut[1];
+export const PROBLEM_DURATION = 328;
 
 /* -------------------------------------------------------------------------- */
 /*  Géométrie (repère 1080 × 1920)                                            */
@@ -406,6 +410,19 @@ export const ReviewCollectionProblem: React.FC = () => {
   const line2 = question(5) * questionOut;
   const stars = question(11) * questionOut;
 
+  /** Conclusion : le parcours démontré est trop long pour être spontané. */
+  const conclusion = (delay: number) =>
+    interpolate(
+      frame,
+      [T.conclusionIn[0] + delay, T.conclusionIn[1] + delay],
+      [0, 1],
+      { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_OUT },
+    );
+
+  const conclusionIcon = conclusion(0);
+  const conclusionTitle = conclusion(5);
+  const conclusionReason = conclusion(11);
+
   return (
     <div
       style={{
@@ -678,6 +695,81 @@ export const ReviewCollectionProblem: React.FC = () => {
               gap={6}
               idPrefix="question-stars"
             />
+          </div>
+        </div>
+      ) : null}
+
+      {/* ---------------------------------------------------------------- */}
+      {/*  Conclusion — pourquoi le parcours classique ne suffit pas       */}
+      {/* ---------------------------------------------------------------- */}
+      {conclusionIcon > 0 ? (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: FRAME_W,
+            height: FRAME_H,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingLeft: 72,
+            paddingRight: 72,
+            boxSizing: "border-box",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              width: 180,
+              height: 180,
+              borderRadius: 36,
+              border: `2px solid ${G.border}`,
+              backgroundColor: G.white,
+              boxShadow: "0 8px 28px rgba(32,33,36,0.08)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 62,
+              opacity: conclusionIcon * 0.72,
+              translate: `0px ${(1 - conclusionIcon) * 24}px`,
+              scale: (0.94 + conclusionIcon * 0.06).toString(),
+            }}
+          >
+            <SearchStepIcon />
+          </div>
+
+          <div
+            style={{
+              fontSize: 76,
+              fontWeight: 700,
+              color: G.textPrimary,
+              lineHeight: 1.16,
+              opacity: conclusionTitle,
+              translate: `0px ${(1 - conclusionTitle) * 24}px`,
+            }}
+          >
+            Presque aucun client
+            <br />
+            ne fera cette recherche.
+          </div>
+
+          <div
+            style={{
+              marginTop: 42,
+              maxWidth: 850,
+              fontSize: 43,
+              fontWeight: 400,
+              color: G.textSecondary,
+              lineHeight: 1.38,
+              opacity: conclusionReason,
+              translate: `0px ${(1 - conclusionReason) * 20}px`,
+            }}
+          >
+            Ils oublient… ou n’ont simplement pas envie
+            <br />
+            de faire toutes ces étapes.
           </div>
         </div>
       ) : null}
