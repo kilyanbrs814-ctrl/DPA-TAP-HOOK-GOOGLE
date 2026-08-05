@@ -51,14 +51,14 @@ export const TRANSITION_FRAMES = {
 } as const;
 
 const hookStart = 0;
-const reelStart = VOICEOVER_FRAMES.plaqueStart;
+const reelStart = VOICEOVER_FRAMES.plaqueVisualStart;
 const localFrame = (absoluteFrame: number) => absoluteFrame - reelStart;
 const contactStart = localFrame(VOICEOVER_FRAMES.phoneStart);
 /** Phone reaches the plaque and the NFC read happens. */
 const contact = localFrame(VOICEOVER_FRAMES.phoneContactEnd) - 18;
 
 /** The phone is fully settled and holds still before the banner arrives. */
-const notifStart = contact + 10;
+const notifStart = localFrame(VOICEOVER_FRAMES.notificationStart);
 /** Finger presses the notification. */
 const notifTap =
   notifStart + TRANSITION_FRAMES.notifEnter + TRANSITION_FRAMES.notifDwell;
@@ -67,7 +67,7 @@ const notifExitStart = notifTap + TRANSITION_FRAMES.notifPress - 1;
 /** Safari begins to occupy the screen — still strictly inside the phone. */
 const safariStart = notifTap + TRANSITION_FRAMES.notifPress;
 /** The Google page paints inside Safari. */
-const pageStart = safariStart + TRANSITION_FRAMES.safariLoad;
+const pageStart = localFrame(VOICEOVER_FRAMES.pageOpenStart);
 
 /**
  * The whole iPhone — chassis included — comes towards the camera and recenters.
@@ -78,8 +78,8 @@ const closeUpStart = safariStart + TRANSITION_FRAMES.closeUpDelay;
 const closeUpEnd = closeUpStart + TRANSITION_FRAMES.closeUp;
 
 /** The phone is parked at its close-up: the review interaction can start. */
-const reviewStart = Math.max(closeUpEnd, localFrame(VOICEOVER_FRAMES.reviewActionStart) - 16);
-const successStart = localFrame(VOICEOVER_FRAMES.reviewActionEnd) - 5;
+const reviewStart = Math.max(closeUpEnd, localFrame(VOICEOVER_FRAMES.starsStart) - 18);
+const successStart = localFrame(VOICEOVER_FRAMES.publishEnd) - 4;
 
 /**
  * The reel ends on the "+1 avis" screen, phone at full close-up size, held

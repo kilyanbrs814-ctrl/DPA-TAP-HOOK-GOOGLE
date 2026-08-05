@@ -270,10 +270,10 @@ const LOGO = (() => {
 export const DpaSalesEndScene: React.FC = () => {
   const frame = useCurrentFrame();
 
-  const title = reveal(frame, 0, 16);
-  const subtitle = reveal(frame, 8, 28);
-  const plaques = reveal(frame, 10, 34);
-  const outro = reveal(frame, 68, 92);
+  const title = reveal(frame, 0, 10);
+  const subtitle = reveal(frame, 4, 14);
+  const plaques = reveal(frame, 6, 20);
+  const outro = reveal(frame, 45, 60);
 
   return (
     <AbsoluteFill
@@ -361,8 +361,8 @@ export const DpaSalesEndScene: React.FC = () => {
       {ADVANTAGES.map((advantage, index) => {
         const column = index % 2;
         const row = Math.floor(index / 2);
-        const start = 46 + index * 6;
-        const progress = reveal(frame, start, start + 12);
+        const start = 18 + index * 4;
+        const progress = reveal(frame, start, start + 8);
 
         return (
           <div

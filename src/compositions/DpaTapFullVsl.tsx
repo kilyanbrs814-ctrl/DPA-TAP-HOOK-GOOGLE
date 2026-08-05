@@ -1,9 +1,9 @@
 /**
  * DpaTapFullVsl — le film complet, d'un seul tenant.
  *
- *   0 → 1223      classement, critères et difficulté à récolter des avis ;
- *   1224 → 1741   plaque NFC, iPhone, notification, étoiles et publication ;
- *   1742 → 1911   promesse commerciale et présentation visuelle de DPA TAP.
+ *   0 → 1200      classement, critères et difficulté à récolter des avis ;
+ *   1201 → 1836   plaque NFC, iPhone, notification, étoiles et publication ;
+ *   1837 → 1911   présentation visuelle finale de DPA TAP.
  *
  * Rien n'est pré-rendu : les deux motion designs sont montés comme composants
  * React et partagent la même timeline Remotion. La voix ElevenLabs est la piste

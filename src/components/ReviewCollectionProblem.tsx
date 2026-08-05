@@ -60,11 +60,14 @@ export const SCENE_OUT = [PROBLEM_START - 16, PROBLEM_START + 8] as const;
 /*  Rythme interne (frames locales)                                           */
 /* -------------------------------------------------------------------------- */
 
+const PROBLEM_TIMING_DEMO_OFFSET =
+  VOICEOVER_FRAMES.classicJourneyStart - PROBLEM_START - 8;
+
 export const PROBLEM_TIMING = {
   /** Question d'abord, tenue pour la voix off, puis transition vers la démo. */
   questionIn: [0, 16] as const,
   questionOut: [58, 76] as const,
-  demoStart: VOICEOVER_FRAMES.classicJourneyStart - PROBLEM_START - 8,
+  demoStart: PROBLEM_TIMING_DEMO_OFFSET,
   /** Entrée du seul client satisfait. */
   clientsIn: [0, 18] as const,
   clientStagger: 0,
@@ -79,12 +82,26 @@ export const PROBLEM_TIMING = {
   journeys: [
     { start: 42, arrivals: [94], abandon: [108, 126] },
     { start: 82, arrivals: [132, 212], abandon: [230, 250] },
-    { start: 42, arrivals: [100, 196, 302], abandon: null },
+    {
+      start: 42,
+      arrivals: [
+        VOICEOVER_FRAMES.searchComplete - PROBLEM_START - PROBLEM_TIMING_DEMO_OFFSET,
+        VOICEOVER_FRAMES.reviewsSectionFound - PROBLEM_START - PROBLEM_TIMING_DEMO_OFFSET,
+        VOICEOVER_FRAMES.writingStart - PROBLEM_START - PROBLEM_TIMING_DEMO_OFFSET,
+      ],
+      abandon: null,
+    },
   ],
   /** L'avis réellement publié par le client vert. */
-  review: [322, 348] as const,
+  review: [
+    VOICEOVER_FRAMES.publishStart - PROBLEM_START - PROBLEM_TIMING_DEMO_OFFSET,
+    VOICEOVER_FRAMES.classicJourneyEnd - PROBLEM_START - PROBLEM_TIMING_DEMO_OFFSET + 6,
+  ] as const,
   /** Effacement des profils, du parcours et de l'avis publié. */
-  fadeOut: [360, 390] as const,
+  fadeOut: [
+    VOICEOVER_FRAMES.frictionStart - PROBLEM_START - PROBLEM_TIMING_DEMO_OFFSET - 8,
+    VOICEOVER_FRAMES.frictionStart - PROBLEM_START - PROBLEM_TIMING_DEMO_OFFSET + 14,
+  ] as const,
   /** Conclusion commerciale, en frames absolues dans la scène. */
   conclusionIn: [
     VOICEOVER_FRAMES.frictionStart - PROBLEM_START - 10,
@@ -99,7 +116,8 @@ export const PROBLEM_TIMING = {
  *   99 → 489     le client apparaît, parcourt les trois étapes et publie ;
  *   489 → fin    la conclusion explique pourquoi presque personne ne le fait.
  */
-export const PROBLEM_DURATION = VOICEOVER_FRAMES.plaqueStart - PROBLEM_START;
+export const PROBLEM_DURATION =
+  VOICEOVER_FRAMES.plaqueVisualStart - PROBLEM_START;
 
 /* -------------------------------------------------------------------------- */
 /*  Géométrie (repère 1080 × 1920)                                            */
