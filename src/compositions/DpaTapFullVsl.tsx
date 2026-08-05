@@ -33,6 +33,7 @@ import { DpaTapReelBlue } from "../dpa/DpaTapReelBlue";
 import { DURATION_IN_FRAMES } from "../dpa/constants";
 import { DpaSalesEndScene, SALES_END_DURATION } from "./DpaSalesEndScene";
 import { GOOGLE_VSL_DURATION, GoogleRankingVsl } from "./GoogleRankingVsl";
+import { GoogleRankingHook } from "./GoogleRankingHook";
 import { VOICEOVER, VOICEOVER_FRAMES } from "../config/voiceover";
 
 /**
@@ -45,6 +46,17 @@ export { GOOGLE_VSL_DURATION };
 
 /** Durée du swipe : 22 frames ≈ 0,73 s à 30 fps. */
 export const SWIPE_DURATION = 22;
+
+/**
+ * Payoff visuel de la phrase : « Chaque nouvel avis renforce votre réputation
+ * et vous aide à remonter face à vos concurrents. »
+ *
+ * Ces repères sont volontairement indépendants de `voiceover.ts` : ajouter ce
+ * rappel visuel ne déplace aucune scène ni aucun réglage déjà validé.
+ */
+const RANKING_PAYOFF_START = 52 * 30;
+const RANKING_PAYOFF_DURATION = 5 * 30;
+const RANKING_PAYOFF_SWIPE = 12;
 
 /**
  * Première frame du reel NFC : la frame où le swipe commence.
@@ -142,6 +154,47 @@ const HorizontalSwipe: React.FC<{
   );
 };
 
+/**
+ * Rejoue le hook Google validé dans une fenêtre de cinq secondes.
+ * La page entre depuis la droite, l'animation attend la fin du swipe, puis la
+ * fiche gagne ses avis et dépasse les trois concurrents avant de sortir à
+ * gauche. La scène principale continue de tourner dessous sans être modifiée.
+ */
+const RankingPayoff: React.FC = () => {
+  const frame = useCurrentFrame();
+  const { width } = useVideoConfig();
+
+  const x = interpolate(
+    frame,
+    [
+      0,
+      RANKING_PAYOFF_SWIPE,
+      RANKING_PAYOFF_DURATION - RANKING_PAYOFF_SWIPE,
+      RANKING_PAYOFF_DURATION,
+    ],
+    [width, 0, 0, -width],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: [SWIPE_EASING, Easing.linear, SWIPE_EASING],
+    },
+  );
+
+  return (
+    <AbsoluteFill
+      style={{
+        backgroundColor: G.white,
+        translate: `${x}px 0px`,
+        boxShadow: "-18px 0 42px rgba(60, 64, 67, 0.12)",
+      }}
+    >
+      <Freeze frame={Math.max(0, frame - RANKING_PAYOFF_SWIPE)}>
+        <GoogleRankingHook />
+      </Freeze>
+    </AbsoluteFill>
+  );
+};
+
 export const DpaTapFullVsl: React.FC = () => {
   return (
     /*
@@ -206,6 +259,19 @@ export const DpaTapFullVsl: React.FC = () => {
           }
           incoming={<DpaSalesEndScene />}
         />
+      </Sequence>
+
+      {/*
+        Rappel du hook entre 52 s et 57 s. Placé en dernier, il passe au-dessus
+        du montage existant sans en changer les durées ni les timecodes.
+      */}
+      <Sequence
+        from={RANKING_PAYOFF_START}
+        durationInFrames={RANKING_PAYOFF_DURATION}
+        premountFor={30}
+        name="Payoff : les avis font remonter l'établissement (52-57 s)"
+      >
+        <RankingPayoff />
       </Sequence>
     </AbsoluteFill>
   );
