@@ -14,8 +14,9 @@
  * Le tirage étant déterministe, la carte est identique à chaque frame et à
  * chaque rendu.
  *
- * Le viewBox (820 × 300) est exactement au ratio du cadre (984 × 360) : la
- * carte remplit son cadre, sans marge ni débordement.
+ * Le plan source mesure 820 × 300, mais le viewBox est resserré autour du
+ * quartier central pour retrouver le niveau de zoom d'une vraie recherche
+ * locale Google. Le ratio du cadre (984 × 360) reste strictement conservé.
  *
  * La carte étant redessinée, elle ne porte aucune mention d'attribution.
  */
@@ -28,6 +29,13 @@ import { ExpandIcon } from "./GoogleIcons";
 /** 820 × 300 = 984 / 360 : aucun rognage. */
 const VB_W = 820;
 const VB_H = 300;
+
+/** Zoom de quartier relevé sur la capture Google de référence. */
+const MAP_ZOOM = 1.55;
+const VIEW_W = VB_W / MAP_ZOOM;
+const VIEW_H = VB_H / MAP_ZOOM;
+const VIEW_X = (VB_W - VIEW_W) / 2;
+const VIEW_Y = (VB_H - VIEW_H) / 2;
 
 /**
  * Teintes relevées sur la capture Google Maps de référence.
@@ -274,7 +282,7 @@ export const GoogleLocalMap: React.FC = () => {
       }}
     >
       <svg
-        viewBox={`0 0 ${VB_W} ${VB_H}`}
+        viewBox={`${VIEW_X} ${VIEW_Y} ${VIEW_W} ${VIEW_H}`}
         width="100%"
         height="100%"
         preserveAspectRatio="xMidYMid slice"
