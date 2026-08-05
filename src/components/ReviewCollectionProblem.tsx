@@ -6,13 +6,12 @@
  * swipe horizontal vers la plaque NFC. Elle installe la difficulté commerciale
  * que la plaque vient résoudre :
  *
- *   1. un client satisfait (coche verte, aucun texte) ;
- *   2. le parcours classique pour déposer un avis : chercher, trouver la
+ *   1. la question « Mais comment obtenir plus d'avis Google ? » ;
+ *   2. un client satisfait apparaît (coche verte, aucun texte) ;
+ *   3. le parcours classique pour déposer un avis : chercher, trouver la
  *      section des avis, rédiger et publier — trois étapes, uniquement des
  *      icônes ;
- *   3. le client va au bout et publie réellement son avis ;
- *   4. la question « Mais comment obtenir plus d'avis Google ? », tenue assez
- *      longtemps pour être prononcée en voix off.
+ *   4. le client va au bout et publie réellement son avis.
  *
  * Aucun pourcentage, aucune statistique : la difficulté se lit uniquement dans
  * les abandons et dans la longueur du parcours.
@@ -59,9 +58,13 @@ export const SCENE_OUT = [PROBLEM_START, PROBLEM_START + 24] as const;
 /* -------------------------------------------------------------------------- */
 
 export const PROBLEM_TIMING = {
-  /** Entrée des trois clients satisfaits, décalée de 6 frames chacun. */
+  /** Question d'abord, tenue pour la voix off, puis transition vers la démo. */
+  questionIn: [10, 28] as const,
+  questionOut: [82, 98] as const,
+  demoStart: 92,
+  /** Entrée du seul client satisfait. */
   clientsIn: [12, 30] as const,
-  clientStagger: 6,
+  clientStagger: 0,
   /** Tracé du parcours puis apparition des trois étapes. */
   pathDraw: [22, 44] as const,
   tileStarts: [28, 34, 40] as const,
@@ -73,28 +76,22 @@ export const PROBLEM_TIMING = {
   journeys: [
     { start: 36, arrivals: [48], abandon: [54, 64] },
     { start: 60, arrivals: [72, 84], abandon: [90, 100] },
-    { start: 96, arrivals: [108, 118, 128], abandon: null },
+    { start: 36, arrivals: [52, 70, 88], abandon: null },
   ],
   /** L'avis réellement publié par le client vert. */
-  review: [128, 144] as const,
+  review: [88, 104] as const,
   /** Effacement des profils, du parcours et de l'avis publié. */
-  fadeOut: [158, 176] as const,
-  /** Entrée de la question. */
-  questionIn: [170, 188] as const,
+  fadeOut: [124, 142] as const,
 } as const;
 
 /**
  * Durée totale de la scène.
  *
- *   36 → 128   la difficulté : trois parcours successifs, deux abandons
- *              (92 frames ≈ 3,07 s) ;
- *   188 → 261  la question, entièrement lisible et immobile
- *              (73 frames ≈ 2,43 s) — le temps de la prononcer en voix off.
- *
- * Les fenêtres d'abandon et de départ ne se recouvrent jamais : un client a
- * complètement disparu avant que le suivant ne quitte la rangée.
+ *   10 → 98    la question entre, reste lisible, puis s'efface ;
+ *   92 → 234   le client apparaît, parcourt les trois étapes et publie.
  */
-export const PROBLEM_DURATION = 262;
+export const PROBLEM_DURATION =
+  PROBLEM_TIMING.demoStart + PROBLEM_TIMING.fadeOut[1];
 
 /* -------------------------------------------------------------------------- */
 /*  Géométrie (repère 1080 × 1920)                                            */
@@ -344,28 +341,40 @@ const computeClientState = (index: number, frame: number): ClientState => {
 export const ReviewCollectionProblem: React.FC = () => {
   const frame = useCurrentFrame();
   const T = PROBLEM_TIMING;
+  const demoFrame = frame - T.demoStart;
 
-  /** Effacement global de la démonstration, juste avant la question. */
-  const demo = interpolate(frame, [T.fadeOut[0], T.fadeOut[1]], [1, 0], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.inOut(Easing.cubic),
-  });
-
-  /** Tracé de la colonne du parcours. */
-  const pathDraw = interpolate(frame, [T.pathDraw[0], T.pathDraw[1]], [0, 1], {
+  /** Entrée après la question, puis effacement global de la démonstration. */
+  const demoIn = interpolate(demoFrame, [0, 14], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: EASE_OUT,
   });
+  const demoOut = interpolate(demoFrame, [T.fadeOut[0], T.fadeOut[1]], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.cubic),
+  });
+  const demo = demoIn * demoOut;
 
-  const activeClient = computeClientState(ACTIVE_CLIENT_INDEX, frame);
+  /** Tracé de la colonne du parcours. */
+  const pathDraw = interpolate(
+    demoFrame,
+    [T.pathDraw[0], T.pathDraw[1]],
+    [0, 1],
+    {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: EASE_OUT,
+    },
+  );
+
+  const activeClient = computeClientState(ACTIVE_CLIENT_INDEX, demoFrame);
   const activeJourney = T.journeys[ACTIVE_CLIENT_INDEX];
 
   /** Étape atteinte : la tuile et son nœud passent au bleu Google. */
   const stepReached = STEP_Y.map((_, step) => {
     const arrival = activeJourney.arrivals[step];
-    return interpolate(frame, [arrival - 4, arrival + 4], [0, 1], {
+    return interpolate(demoFrame, [arrival - 4, arrival + 4], [0, 1], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
       easing: EASE_OUT,
@@ -373,7 +382,7 @@ export const ReviewCollectionProblem: React.FC = () => {
   });
 
   /** Apparition de l'avis publié par le client vert. */
-  const published = interpolate(frame, [T.review[0], T.review[1]], [0, 1], {
+  const published = interpolate(demoFrame, [T.review[0], T.review[1]], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: EASE_OUT,
@@ -388,9 +397,14 @@ export const ReviewCollectionProblem: React.FC = () => {
       { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_OUT },
     );
 
-  const line1 = question(0);
-  const line2 = question(5);
-  const stars = question(11);
+  const questionOut = interpolate(frame, T.questionOut, [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.cubic),
+  });
+  const line1 = question(0) * questionOut;
+  const line2 = question(5) * questionOut;
+  const stars = question(11) * questionOut;
 
   return (
     <div
@@ -483,7 +497,7 @@ export const ReviewCollectionProblem: React.FC = () => {
           {STEP_Y.map((stepY, step) => {
             const Icon = STEP_ICONS[step];
             const appear = interpolate(
-              frame,
+              demoFrame,
               [T.tileStarts[step], T.tileStarts[step] + T.tileDuration],
               [0, 1],
               {
