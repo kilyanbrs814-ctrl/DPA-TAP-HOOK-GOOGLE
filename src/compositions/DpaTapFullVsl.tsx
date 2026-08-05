@@ -149,7 +149,11 @@ export const DpaTapFullVsl: React.FC = () => {
       derrière la piste qui défile et pendant tout le reel : à aucun moment un
       pixel noir ou gris n'est peint en plein cadre, donc ni flash, ni fondu.
     */
-    <AbsoluteFill style={{ backgroundColor: G.white }}>
+    <AbsoluteFill
+      style={{
+        backgroundColor: G.white,
+      }}
+    >
       <Audio
         src={staticFile(VOICEOVER.asset)}
         trimAfter={VOICEOVER_FRAMES.spokenEnd}
@@ -158,10 +162,10 @@ export const DpaTapFullVsl: React.FC = () => {
       <Sequence
         durationInFrames={GOOGLE_VSL_DURATION}
         name="Hook Google + acte 2 (0-731)"
+        from={-2}
       >
         <GoogleRankingVsl />
       </Sequence>
-
       {/*
         Swipe + reel NFC. La frame interne repart de 0 à la frame globale 732,
         donc tous les `T.*`, les sons et les animations restent synchronisés
@@ -184,7 +188,6 @@ export const DpaTapFullVsl: React.FC = () => {
           incoming={<DpaTapReelBlue />}
         />
       </Sequence>
-
       {/*
         Seconde jonction, rigoureusement identique à la première : l'écran
         « +1 avis » — le reel gelé sur sa dernière frame — sort par la gauche
