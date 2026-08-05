@@ -209,7 +209,7 @@ const ReviewsStepIcon: React.FC = () => (
       <path
         key={i}
         d="M4 0.6l1.06 2.2 2.4.32-1.76 1.66.44 2.38L4 6.02 1.86 7.16l.44-2.38L.54 3.12l2.4-.32z"
-        transform={`translate(${11.4 + i * 5.6} 30)`}
+        transform={`translate(${8.8 + i * 5.6} 30)`}
         fill={G.starYellow}
       />
     ))}
