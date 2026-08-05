@@ -752,7 +752,7 @@ export const ReviewCollectionProblem: React.FC = () => {
           >
             Presque aucun client
             <br />
-            ne fera cette recherche.
+            ne fait cette recherche.
           </div>
 
           <div
