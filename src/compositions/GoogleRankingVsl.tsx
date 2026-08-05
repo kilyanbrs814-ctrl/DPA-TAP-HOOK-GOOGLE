@@ -42,13 +42,8 @@ import {
  * importent cette constante, personne ne la recopie ni ne la code en dur.
  *
  *   0 → 119    le hook validé ;
- *   120 → 348  défilement, voiles, arbre des trois critères, « Réputation »
- *              passe au vert ;
- *   350 → 470  séquence muette « avis Google → réputation » (ReviewFlow) ;
- *   471 → 479  temps de pose sur la pastille renforcée ;
- *   480 → 503  l'arbre, les avis et la fiche s'effacent en fondu ;
- *   480 → 731  clients satisfaits, parcours classique, abandons, avis publié,
- *              puis la question tenue pour la voix off.
+ *   120 → 580   arbre des trois critères, limites puis réputation renforcée ;
+ *   581 → 1223 question, parcours classique et constat d'abandon.
  */
 export const GOOGLE_VSL_DURATION = PROBLEM_START + PROBLEM_DURATION;
 

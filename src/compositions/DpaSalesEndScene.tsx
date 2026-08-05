@@ -20,9 +20,11 @@ import { useCurrentFrame } from "remotion";
 import { FONT_FAMILY } from "../config/fonts";
 import { G } from "../config/google-ui";
 import { ASSETS } from "../dpa/constants";
+import { VOICEOVER_FRAMES } from "../config/voiceover";
 
-/** Durée de la scène : 180 frames = 6 s à 30 fps. */
-export const SALES_END_DURATION = 180;
+/** Durée restante jusqu'à la fin exacte du fichier voix off. */
+export const SALES_END_DURATION =
+  VOICEOVER_FRAMES.total - VOICEOVER_FRAMES.salesEndStart;
 
 /** Marge latérale, alignée sur la safe zone du reel (`SAFE.left` / `SAFE.right`). */
 const MARGIN = 110;
@@ -268,9 +270,9 @@ const LOGO = (() => {
 export const DpaSalesEndScene: React.FC = () => {
   const frame = useCurrentFrame();
 
-  const title = reveal(frame, 18, 36);
-  const subtitle = reveal(frame, 26, 44);
-  const plaques = reveal(frame, 28, 50);
+  const title = reveal(frame, 0, 16);
+  const subtitle = reveal(frame, 8, 28);
+  const plaques = reveal(frame, 10, 34);
   const outro = reveal(frame, 68, 92);
 
   return (

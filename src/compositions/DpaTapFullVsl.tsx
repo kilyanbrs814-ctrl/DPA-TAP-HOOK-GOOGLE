@@ -1,20 +1,13 @@
 /**
  * DpaTapFullVsl — le film complet, d'un seul tenant.
  *
- *   frames 0 → 731     le hook Google (`GoogleRankingVsl`) : classement, arbre
- *                      des critères, avis qui renforcent « Réputation », puis
- *                      la difficulté à récolter les avis et la question ;
- *   frames 732 → 753   swipe horizontal : la question sort par la gauche
- *                      pendant que la scène DPA entre par la droite ;
- *   frames 754 → 1034  le reel NFC occupe tout le cadre et continue ;
- *   frames 1035 → 1056 second swipe, identique au premier : l'écran « +1 avis »
- *                      sort par la gauche, la page de présentation entre par la
- *                      droite ;
- *   frames 1057 → 1214 la scène commerciale, stable, jusqu'à la dernière frame.
+ *   0 → 1223      classement, critères et difficulté à récolter des avis ;
+ *   1224 → 1741   plaque NFC, iPhone, notification, étoiles et publication ;
+ *   1742 → 1911   promesse commerciale et présentation visuelle de DPA TAP.
  *
  * Rien n'est pré-rendu : les deux motion designs sont montés comme composants
- * React et partagent la même timeline Remotion. Aucune balise <Video>, aucun
- * MP4 intermédiaire.
+ * React et partagent la même timeline Remotion. La voix ElevenLabs est la piste
+ * maîtresse ; ses repères sont centralisés dans `config/voiceover.ts`.
  *
  * La jonction est un défilement horizontal, pas une rotation : les deux scènes
  * sont posées côte à côte sur une piste de 2160 px et c'est la piste entière qui
@@ -24,6 +17,7 @@
  */
 
 import React from "react";
+import { Audio } from "@remotion/media";
 import {
   AbsoluteFill,
   Easing,
@@ -32,15 +26,18 @@ import {
   Sequence,
   useCurrentFrame,
   useVideoConfig,
+  staticFile,
 } from "remotion";
 import { G } from "../config/google-ui";
 import { DpaTapReelBlue } from "../dpa/DpaTapReelBlue";
 import { DURATION_IN_FRAMES } from "../dpa/constants";
 import { DpaSalesEndScene, SALES_END_DURATION } from "./DpaSalesEndScene";
 import { GOOGLE_VSL_DURATION, GoogleRankingVsl } from "./GoogleRankingVsl";
+import { VOICEOVER, VOICEOVER_FRAMES } from "../config/voiceover";
 
 /**
- * Durée du hook Google. Sa dernière image visible est la frame 731.
+ * Durée du hook Google. Sa dernière image visible précède l'arrivée de la
+ * plaque à 40,811 secondes.
  * La valeur est définie une seule fois, dans `GoogleRankingVsl` ; elle est
  * simplement réexportée ici pour les consommateurs historiques.
  */
@@ -60,7 +57,7 @@ export const SWIPE_DURATION = 22;
  */
 export const DPA_START = GOOGLE_VSL_DURATION;
 
-/** Fin du film d'origine : hook + swipe + reel NFC, dernière frame 1034. */
+/** Fin du reel NFC, au début de la promesse commerciale. */
 export const CORE_DURATION = DPA_START + DURATION_IN_FRAMES;
 
 /** Durée totale, calculée — jamais écrite en dur. */
@@ -153,6 +150,11 @@ export const DpaTapFullVsl: React.FC = () => {
       pixel noir ou gris n'est peint en plein cadre, donc ni flash, ni fondu.
     */
     <AbsoluteFill style={{ backgroundColor: G.white }}>
+      <Audio
+        src={staticFile(VOICEOVER.asset)}
+        trimAfter={VOICEOVER_FRAMES.spokenEnd}
+        volume={1}
+      />
       <Sequence
         durationInFrames={GOOGLE_VSL_DURATION}
         name="Hook Google + acte 2 (0-731)"

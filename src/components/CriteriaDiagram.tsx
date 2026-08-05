@@ -20,6 +20,7 @@ import {
 } from "remotion";
 import { G } from "../config/google-ui";
 import { FONT_FAMILY } from "../config/fonts";
+import { VOICEOVER_FRAMES } from "../config/voiceover";
 
 /* -------------------------------------------------------------------------- */
 /*  Géométrie (repère 1080 × 1920)                                            */
@@ -64,18 +65,18 @@ export const DIAGRAM_GEOMETRY = {
 /* -------------------------------------------------------------------------- */
 
 export const CRITERIA_TIMING = {
-  trunk: [158, 188] as const,
+  trunk: [VOICEOVER_FRAMES.criteriaStart, VOICEOVER_FRAMES.criteriaStart + 30] as const,
   /** Départ décalé de chaque branche ; chacune se trace en 26 frames. */
-  branchStarts: [184, 190, 196] as const,
+  branchStarts: [166, 190, 214] as const,
   branchDuration: 26,
   /** Départ décalé de l'apparition des trois pastilles. */
-  chipStarts: [202, 210, 218] as const,
+  chipStarts: [194, 226, 258] as const,
   chipDuration: 22,
-  strikeRelevance: [250, 274] as const,
-  dimRelevance: [262, 282] as const,
-  strikeProximity: [286, 310] as const,
-  dimProximity: [298, 318] as const,
-  reputation: [322, 348] as const,
+  strikeRelevance: [VOICEOVER_FRAMES.controlStart + 8, VOICEOVER_FRAMES.controlStart + 32] as const,
+  dimRelevance: [VOICEOVER_FRAMES.controlStart + 20, VOICEOVER_FRAMES.controlStart + 40] as const,
+  strikeProximity: [VOICEOVER_FRAMES.controlStart + 72, VOICEOVER_FRAMES.controlStart + 96] as const,
+  dimProximity: [VOICEOVER_FRAMES.controlStart + 84, VOICEOVER_FRAMES.controlStart + 104] as const,
+  reputation: [VOICEOVER_FRAMES.controlEnd - 34, VOICEOVER_FRAMES.controlEnd - 8] as const,
 } as const;
 
 /* -------------------------------------------------------------------------- */
@@ -89,15 +90,15 @@ export const CRITERIA_TIMING = {
  */
 export const REVIEW_FLOW = {
   /** Effacement des deux branches barrées : il ne reste que « Réputation ». */
-  fadeOthers: [350, 376] as const,
+  fadeOthers: [530, 552] as const,
   /** Mise en avant du bloc note · étoiles · avis de la fiche Google. */
-  highlight: [352, 382] as const,
+  highlight: [520, 544] as const,
   /** Départ de chacun des trois avis Google depuis la fiche. */
-  cardStarts: [364, 396, 428] as const,
+  cardStarts: [522, 540, 558] as const,
   /** Trajet d'un avis, de la fiche jusqu'à la branche verte. */
-  cardTravel: 30,
+  cardTravel: 14,
   /** Durée du renforcement déclenché par un avis qui arrive. */
-  impact: 12,
+  impact: 8,
 } as const;
 
 /** Frames d'arrivée des avis sur la branche verte : 394, 426, 458. */

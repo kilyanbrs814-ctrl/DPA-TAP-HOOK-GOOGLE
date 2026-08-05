@@ -8,6 +8,8 @@
  * needs to be touched.
  */
 
+import { VOICEOVER_FRAMES } from "../config/voiceover";
+
 export const FPS = 30;
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
@@ -21,8 +23,6 @@ export const SCENE_SECONDS = {
   review: 2.8, // stars + "Publier", inside the phone screen
   success: 2.6, // "+1 avis", then a short static hold — the reel ends here
 } as const;
-
-const s = (seconds: number) => Math.round(seconds * DURATION_SCALE * FPS);
 
 /**
  * Notification → Safari → close-up, expressed directly in frames because every
@@ -51,12 +51,14 @@ export const TRANSITION_FRAMES = {
 } as const;
 
 const hookStart = 0;
-const contactStart = hookStart + s(SCENE_SECONDS.hook);
+const reelStart = VOICEOVER_FRAMES.plaqueStart;
+const localFrame = (absoluteFrame: number) => absoluteFrame - reelStart;
+const contactStart = localFrame(VOICEOVER_FRAMES.phoneStart);
 /** Phone reaches the plaque and the NFC read happens. */
-const contact = contactStart + 26;
+const contact = localFrame(VOICEOVER_FRAMES.phoneContactEnd) - 18;
 
 /** The phone is fully settled and holds still before the banner arrives. */
-const notifStart = contactStart + s(SCENE_SECONDS.contact);
+const notifStart = contact + 10;
 /** Finger presses the notification. */
 const notifTap =
   notifStart + TRANSITION_FRAMES.notifEnter + TRANSITION_FRAMES.notifDwell;
@@ -76,15 +78,15 @@ const closeUpStart = safariStart + TRANSITION_FRAMES.closeUpDelay;
 const closeUpEnd = closeUpStart + TRANSITION_FRAMES.closeUp;
 
 /** The phone is parked at its close-up: the review interaction can start. */
-const reviewStart = closeUpEnd;
-const successStart = reviewStart + s(SCENE_SECONDS.review);
+const reviewStart = Math.max(closeUpEnd, localFrame(VOICEOVER_FRAMES.reviewActionStart) - 16);
+const successStart = localFrame(VOICEOVER_FRAMES.reviewActionEnd) - 5;
 
 /**
  * The reel ends on the "+1 avis" screen, phone at full close-up size, held
  * still. There is no signature scene and no exit transition: nothing shrinks,
  * nothing slides, the last frame is the same shot as the first success frame.
  */
-const end = successStart + s(SCENE_SECONDS.success);
+const end = localFrame(VOICEOVER_FRAMES.salesEndStart);
 
 /**
  * Absolute frame numbers. Everything in the reel reads its timing from here.
@@ -98,7 +100,7 @@ export const T = {
    * elle apparaît, on la lit, puis elle se déplace — et seulement parce que le
    * téléphone arrive (il devient visible à `contactStart - 6`).
    */
-  plaqueMove: contactStart - 8,
+  plaqueMove: contactStart - 24,
 
   contactStart,
   contact,
@@ -116,11 +118,11 @@ export const T = {
    * Five quick taps: the stars are triggered 2 frames apart, so the whole row
    * is selected in 8 frames (0.27 s) and settled 4 frames later.
    */
-  starFirst: reviewStart + 30,
+  starFirst: reviewStart + 18,
   starStep: 2,
   starReact: 4,
   /** Finger presses "Publier", ~1 s after the last star. */
-  publishTap: successStart - 16,
+  publishTap: successStart - 18,
   /**
    * The confirmation whiteout starts to build here and peaks exactly on
    * `successStart`, so the swap from the phone to the full-screen "+1 avis"

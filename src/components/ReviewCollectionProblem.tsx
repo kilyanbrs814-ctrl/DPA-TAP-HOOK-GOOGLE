@@ -27,7 +27,7 @@ import React from "react";
 import { Easing, interpolate, useCurrentFrame } from "remotion";
 import { G } from "../config/google-ui";
 import { FONT_FAMILY } from "../config/fonts";
-import { REVIEW_FLOW_END } from "./CriteriaDiagram";
+import { VOICEOVER_FRAMES } from "../config/voiceover";
 import {
   FLOW_REVIEWS,
   GoogleReviewCard,
@@ -46,14 +46,15 @@ import { StarsRating } from "./StarsRating";
 export const PROBLEM_HOLD = 10;
 
 /** Première frame absolue de la scène, dérivée de la fin réelle du flux. */
-export const PROBLEM_START = REVIEW_FLOW_END + PROBLEM_HOLD;
+/** Pré-roll de 8 frames : le titre est déjà en mouvement au premier mot. */
+export const PROBLEM_START = VOICEOVER_FRAMES.questionStart - 8;
 
 /**
  * Disparition de l'arbre, des avis et de la fiche établissement, en frames
  * absolues. Elle chevauche l'entrée des clients : l'histoire se poursuit, elle
  * ne redémarre pas.
  */
-export const SCENE_OUT = [PROBLEM_START, PROBLEM_START + 24] as const;
+export const SCENE_OUT = [PROBLEM_START - 16, PROBLEM_START + 8] as const;
 
 /* -------------------------------------------------------------------------- */
 /*  Rythme interne (frames locales)                                           */
@@ -61,41 +62,44 @@ export const SCENE_OUT = [PROBLEM_START, PROBLEM_START + 24] as const;
 
 export const PROBLEM_TIMING = {
   /** Question d'abord, tenue pour la voix off, puis transition vers la démo. */
-  questionIn: [10, 28] as const,
-  questionOut: [82, 98] as const,
-  demoStart: 92,
+  questionIn: [0, 16] as const,
+  questionOut: [58, 76] as const,
+  demoStart: VOICEOVER_FRAMES.classicJourneyStart - PROBLEM_START - 8,
   /** Entrée du seul client satisfait. */
-  clientsIn: [12, 30] as const,
+  clientsIn: [0, 18] as const,
   clientStagger: 0,
   /** Tracé du parcours puis apparition des trois étapes. */
-  pathDraw: [22, 44] as const,
-  tileStarts: [28, 34, 40] as const,
-  tileDuration: 16,
+  pathDraw: [18, 54] as const,
+  tileStarts: [30, 58, 86] as const,
+  tileDuration: 20,
   /**
    * Un parcours par client. `arrivals` donne la frame d'arrivée à chaque
    * étape ; `abandon` la fenêtre de disparition pour ceux qui renoncent.
    */
   journeys: [
-    { start: 36, arrivals: [48], abandon: [54, 64] },
-    { start: 60, arrivals: [72, 84], abandon: [90, 100] },
-    { start: 36, arrivals: [52, 70, 88], abandon: null },
+    { start: 42, arrivals: [94], abandon: [108, 126] },
+    { start: 82, arrivals: [132, 212], abandon: [230, 250] },
+    { start: 42, arrivals: [100, 196, 302], abandon: null },
   ],
   /** L'avis réellement publié par le client vert. */
-  review: [88, 104] as const,
+  review: [322, 348] as const,
   /** Effacement des profils, du parcours et de l'avis publié. */
-  fadeOut: [124, 142] as const,
+  fadeOut: [360, 390] as const,
   /** Conclusion commerciale, en frames absolues dans la scène. */
-  conclusionIn: [222, 242] as const,
+  conclusionIn: [
+    VOICEOVER_FRAMES.frictionStart - PROBLEM_START - 10,
+    VOICEOVER_FRAMES.frictionStart - PROBLEM_START + 10,
+  ] as const,
 } as const;
 
 /**
  * Durée totale de la scène.
  *
- *   10 → 98    la question entre, reste lisible, puis s'efface ;
- *   92 → 234   le client apparaît, parcourt les trois étapes et publie ;
- *   222 → 328  la conclusion explique pourquoi presque personne ne le fait.
+ *   0 → 76       la question entre, reste lisible, puis s'efface ;
+ *   99 → 489     le client apparaît, parcourt les trois étapes et publie ;
+ *   489 → fin    la conclusion explique pourquoi presque personne ne le fait.
  */
-export const PROBLEM_DURATION = 328;
+export const PROBLEM_DURATION = VOICEOVER_FRAMES.plaqueStart - PROBLEM_START;
 
 /* -------------------------------------------------------------------------- */
 /*  Géométrie (repère 1080 × 1920)                                            */
