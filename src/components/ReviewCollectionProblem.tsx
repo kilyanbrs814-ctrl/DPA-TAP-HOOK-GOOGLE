@@ -182,7 +182,7 @@ const SearchStepIcon: React.FC = () => (
         position: "absolute",
         left: 0,
         top: 0,
-        translate: "24px 24px",
+        translate: "27.5px 27.5px",
       }}
     >
       <GoogleG size={36} />
