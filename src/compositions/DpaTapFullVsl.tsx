@@ -205,12 +205,15 @@ export const DpaTapFullVsl: React.FC = () => {
     <AbsoluteFill
       style={{
         backgroundColor: G.white,
+        translate: "0px 1px",
       }}
+      from={-4}
     >
       <Audio
         src={staticFile(VOICEOVER.asset)}
         trimAfter={VOICEOVER_FRAMES.spokenEnd}
         volume={1}
+        from={4}
       />
       <Sequence
         durationInFrames={GOOGLE_VSL_DURATION}
@@ -263,7 +266,6 @@ export const DpaTapFullVsl: React.FC = () => {
           incoming={<DpaSalesEndScene />}
         />
       </Sequence>
-
       {/*
         Rappel du hook entre 52 s et 57 s. Placé en dernier, il passe au-dessus
         du montage existant sans en changer les durées ni les timecodes.
