@@ -31,7 +31,7 @@ const VB_W = 820;
 const VB_H = 300;
 
 /** Zoom de quartier relevé sur la capture Google de référence. */
-const MAP_ZOOM = 1.55;
+const MAP_ZOOM = 1.9;
 const VIEW_W = VB_W / MAP_ZOOM;
 const VIEW_H = VB_H / MAP_ZOOM;
 const VIEW_X = (VB_W - VIEW_W) / 2;
@@ -188,40 +188,58 @@ const RoadShield: React.FC<{ x: number; y: number; label: string }> = ({
   );
 };
 
-/** Repère rouge Google : anneau rouge, centre blanc, ombre discrète. */
+/** Repère Google : goutte blanche, disque rouge, centre blanc et ombre. */
 const Marker: React.FC<{ x: number; y: number; big?: boolean }> = ({
   x,
   y,
   big = false,
 }) => {
-  const r = big ? 8.4 : 6;
+  const size = big ? 10 : 8;
+  const centerY = y - size * 0.2;
 
   return (
     <g>
       <ellipse
         cx={x}
-        cy={y + r * 0.55}
-        rx={r * 0.9}
-        ry={r * 0.4}
+        cy={y + size * 1.45}
+        rx={size * 0.88}
+        ry={size * 0.32}
         fill="#000000"
-        opacity={0.16}
+        opacity={0.2}
       />
-      <circle cx={x} cy={y} r={r} fill="#FFFFFF" />
+      <path
+        d={`M ${x} ${y + size * 1.55}
+            C ${x - size * 0.2} ${y + size * 1.15},
+              ${x - size * 1.22} ${y + size * 0.62},
+              ${x - size * 1.22} ${centerY}
+            A ${size * 1.22} ${size * 1.22} 0 1 1
+              ${x + size * 1.22} ${centerY}
+            C ${x + size * 1.22} ${y + size * 0.62},
+              ${x + size * 0.2} ${y + size * 1.15},
+              ${x} ${y + size * 1.55} Z`}
+        fill="#FFFFFF"
+        stroke="#BDC1C6"
+        strokeWidth={0.9}
+        strokeLinejoin="round"
+      />
       <circle
         cx={x}
-        cy={y}
-        r={r - 1.5}
-        fill="none"
-        stroke={M.pin}
-        strokeWidth={big ? 3.6 : 2.8}
+        cy={centerY}
+        r={size * 0.78}
+        fill={M.pin}
       />
+      <circle cx={x} cy={centerY} r={size * 0.32} fill="#FFFFFF" />
     </g>
   );
 };
 
-/** Point rouge secondaire (lieu non classé). */
+/** Petit repère secondaire, déclinaison compacte du marqueur Google. */
 const Dot: React.FC<{ x: number; y: number }> = ({ x, y }) => (
-  <circle cx={x} cy={y} r={2.4} fill={M.pin} />
+  <g>
+    <circle cx={x} cy={y} r={4.2} fill="#FFFFFF" stroke="#BDC1C6" strokeWidth={0.7} />
+    <circle cx={x} cy={y} r={3} fill={M.pin} />
+    <circle cx={x} cy={y} r={1.15} fill="#FFFFFF" />
+  </g>
 );
 
 /** Repère accompagné du nom de l'établissement. */
