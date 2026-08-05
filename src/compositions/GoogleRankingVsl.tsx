@@ -18,7 +18,9 @@
 import React from "react";
 import {
   AbsoluteFill,
+  Easing,
   interpolate,
+  Sequence,
   spring,
   useCurrentFrame,
   useVideoConfig,
@@ -27,18 +29,28 @@ import { G, LAYOUT } from "../config/google-ui";
 import { GoogleRankingHook } from "./GoogleRankingHook";
 import { CriteriaDiagram, reviewFocus } from "../components/CriteriaDiagram";
 import { ReviewFlow } from "../components/ReviewFlow";
+import {
+  PROBLEM_DURATION,
+  PROBLEM_START,
+  ReviewCollectionProblem,
+  SCENE_OUT,
+} from "../components/ReviewCollectionProblem";
 
 /**
- * Durée totale de la composition — UNIQUE source de vérité.
- * Root.tsx et DpaTapFullVsl importent cette constante, personne ne la recopie.
+ * Durée totale de la composition — UNIQUE source de vérité, calculée depuis la
+ * fin réelle de la scène « difficulté + question ». Root.tsx et DpaTapFullVsl
+ * importent cette constante, personne ne la recopie ni ne la code en dur.
  *
  *   0 → 119    le hook validé ;
  *   120 → 348  défilement, voiles, arbre des trois critères, « Réputation »
  *              passe au vert ;
  *   350 → 470  séquence muette « avis Google → réputation » (ReviewFlow) ;
- *   471 → 477  temps de pose sur l'image renforcée, avant le swipe NFC.
+ *   471 → 479  temps de pose sur la pastille renforcée ;
+ *   480 → 503  l'arbre, les avis et la fiche s'effacent en fondu ;
+ *   480 → 731  clients satisfaits, parcours classique, abandons, avis publié,
+ *              puis la question tenue pour la voix off.
  */
-export const GOOGLE_VSL_DURATION = 478;
+export const GOOGLE_VSL_DURATION = PROBLEM_START + PROBLEM_DURATION;
 
 /** Dernière frame du hook validé. La suite commence juste après. */
 export const HOOK_END_FRAME = 120;
@@ -106,66 +118,121 @@ export const GoogleRankingVsl: React.FC = () => {
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
 
+  /**
+   * Sortie de tout le premier acte — page Google, arbre, avis. Elle démarre
+   * APRÈS le temps de pose sur la pastille « Réputation » renforcée et
+   * chevauche l'entrée des clients satisfaits : l'histoire se prolonge, elle
+   * ne recommence pas. Un très léger retrait d'échelle accompagne le fondu.
+   */
+  const sceneOut = interpolate(frame, [SCENE_OUT[0], SCENE_OUT[1]], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: Easing.inOut(Easing.cubic),
+  });
+
   return (
     <AbsoluteFill style={{ backgroundColor: G.white }}>
       {/*
-        La page Google, inchangée, simplement déplacée en bloc. `ratingFocus`
-        vaut 0 jusqu'à la frame 352 : le hook et toute la montée en première
-        place restent rigoureusement identiques.
+        Premier acte. Il est entièrement démonté une fois invisible : inutile
+        de rejouer le hook et l'arbre pendant les 230 frames de la scène
+        suivante.
       */}
-      <AbsoluteFill style={{ translate: `0px ${scrollY}px` }}>
-        <GoogleRankingHook ratingFocus={reviewFocus(frame)} />
-      </AbsoluteFill>
+      {frame <= SCENE_OUT[1] ? (
+        <AbsoluteFill>
+          {/*
+            Aucune mise à l'échelle sur ce groupe : la page Google se prolonge
+            sous la frame 1920 (les fiches concurrentes suivantes), et le
+            moindre retrait ferait remonter ce contenu dans le cadre, sous le
+            bord bas du voile blanc interne. Le fondu suffit.
+          */}
+          {/*
+            La page Google, inchangée, simplement déplacée en bloc.
+            `ratingFocus` vaut 0 jusqu'à la frame 352 : le hook et toute la
+            montée en première place restent rigoureusement identiques.
+          */}
+          <AbsoluteFill style={{ translate: `0px ${scrollY}px` }}>
+            <GoogleRankingHook ratingFocus={reviewFocus(frame)} />
+          </AbsoluteFill>
+
+          {/*
+            Voile blanc au-dessus de la fiche première : il fait disparaître en
+            fondu le logo, la recherche et la carte, sans rien modifier de la
+            page elle-même. Son bord bas suit la fiche, il ne la recouvre donc
+            jamais.
+          */}
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: "100%",
+              height: cardTop,
+              backgroundColor: G.white,
+              opacity: veil,
+            }}
+          />
+
+          {/*
+            Voile symétrique sous la fiche première : les trois concurrents se
+            dissolvent pendant le déplacement de la page. Son bord haut est
+            exactement le bord bas de la fiche conservée, qui reste intacte et
+            devient le seul point d'ancrage de la composition.
+          */}
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              // 1 px de recouvrement : le ressort du défilement donne une position
+              // sous-pixel, et le séparateur de la fiche suivante laisserait sinon
+              // un filet gris visible. Cette bande n'empiète que sur la marge
+              // basse, vide, de la fiche conservée.
+              top: cardBottom - 1,
+              width: "100%",
+              height: 1920 - cardBottom + 1,
+              backgroundColor: G.white,
+              opacity: competitorsVeil,
+            }}
+          />
+
+          {/*
+            Flux d'avis : trois vrais avis Google partent du bloc noté de la
+            fiche et remontent vers la branche verte. Rendu AVANT le diagramme :
+            chaque avis glisse donc sous la pastille « Réputation » et s'y
+            absorbe, sans jamais masquer ni la branche, ni le libellé.
+          */}
+          <ReviewFlow originY={cardTop} />
+
+          {/* Trait, branches et critères */}
+          <CriteriaDiagram originY={cardTop} />
+        </AbsoluteFill>
+      ) : null}
 
       {/*
-        Voile blanc au-dessus de la fiche première : il fait disparaître en
-        fondu le logo, la recherche et la carte, sans rien modifier de la page
-        elle-même. Son bord bas suit la fiche, donc il ne la recouvre jamais.
+        Sortie du premier acte : un voile blanc qui monte PAR-DESSUS lui, et non
+        une opacité posée sur le groupe. C'est indispensable — baisser l'opacité
+        de l'ensemble rendrait aussi translucides les deux voiles internes, et
+        les fiches concurrentes qu'ils masquent réapparaîtraient en transparence.
+        Sur fond blanc, le résultat visuel est le même : un fondu propre.
       */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width: "100%",
-          height: cardTop,
-          backgroundColor: G.white,
-          opacity: veil,
-        }}
-      />
+      {frame <= SCENE_OUT[1] ? (
+        <AbsoluteFill
+          style={{ backgroundColor: G.white, opacity: 1 - sceneOut }}
+        />
+      ) : null}
 
       {/*
-        Voile symétrique sous la fiche première : les trois concurrents se
-        dissolvent pendant le déplacement de la page. Son bord haut est
-        exactement le bord bas de la fiche conservée, qui reste intacte et
-        devient le seul point d'ancrage de la composition.
+        Second acte : les clients satisfaits, le parcours classique trop long,
+        les abandons, puis la question tenue pour la voix off. Monté dans sa
+        propre <Sequence> : sa frame locale part de 0, ses repères ne dépendent
+        jamais d'un nombre absolu recopié.
       */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          // 1 px de recouvrement : le ressort du défilement donne une position
-          // sous-pixel, et le séparateur de la fiche suivante laisserait sinon
-          // un filet gris visible. Cette bande n'empiète que sur la marge
-          // basse, vide, de la fiche conservée.
-          top: cardBottom - 1,
-          width: "100%",
-          height: 1920 - cardBottom + 1,
-          backgroundColor: G.white,
-          opacity: competitorsVeil,
-        }}
-      />
-
-      {/*
-        Flux d'avis : trois vrais avis Google partent du bloc noté de la fiche
-        et remontent vers la branche verte. Rendu AVANT le diagramme : chaque
-        avis glisse donc sous la pastille « Réputation » et s'y absorbe, sans
-        jamais masquer ni la branche, ni le libellé.
-      */}
-      <ReviewFlow originY={cardTop} />
-
-      {/* Trait, branches et critères */}
-      <CriteriaDiagram originY={cardTop} />
+      <Sequence
+        from={PROBLEM_START}
+        durationInFrames={PROBLEM_DURATION}
+        name="Difficulté à récolter les avis + question"
+      >
+        <ReviewCollectionProblem />
+      </Sequence>
     </AbsoluteFill>
   );
 };
