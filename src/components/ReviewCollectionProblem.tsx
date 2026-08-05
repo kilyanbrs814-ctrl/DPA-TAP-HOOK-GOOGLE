@@ -75,7 +75,7 @@ export const PROBLEM_TIMING = {
     { start: 60, arrivals: [72, 84], abandon: [90, 100] },
     { start: 96, arrivals: [108, 118, 128], abandon: null },
   ],
-/** L'avis réellement publié par le client vert. */
+  /** L'avis réellement publié par le client vert. */
   review: [128, 144] as const,
   /** Effacement des profils, du parcours et de l'avis publié. */
   fadeOut: [158, 176] as const,
@@ -372,7 +372,7 @@ export const ReviewCollectionProblem: React.FC = () => {
     }) * activeClient.alive;
   });
 
-  /** Apparition de l'avis publié par le troisième client. */
+  /** Apparition de l'avis publié par le client vert. */
   const published = interpolate(frame, [T.review[0], T.review[1]], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
