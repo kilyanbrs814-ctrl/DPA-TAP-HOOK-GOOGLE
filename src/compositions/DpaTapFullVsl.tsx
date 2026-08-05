@@ -55,7 +55,6 @@ export const SWIPE_DURATION = 22;
  * rappel visuel ne déplace aucune scène ni aucun réglage déjà validé.
  */
 const RANKING_PAYOFF_START = 52 * 30;
-const RANKING_PAYOFF_DURATION = 5 * 30;
 const RANKING_PAYOFF_SWIPE = 12;
 
 /**
@@ -155,30 +154,20 @@ const HorizontalSwipe: React.FC<{
 };
 
 /**
- * Rejoue le hook Google validé dans une fenêtre de cinq secondes.
+ * Rejoue le hook Google validé à partir de 52 secondes.
  * La page entre depuis la droite, l'animation attend la fin du swipe, puis la
- * fiche gagne ses avis et dépasse les trois concurrents avant de sortir à
- * gauche. La scène principale continue de tourner dessous sans être modifiée.
+ * fiche gagne ses avis et dépasse les trois concurrents. Elle reste ensuite
+ * figée en première place jusqu'à la transition directe vers le CTA final.
  */
 const RankingPayoff: React.FC = () => {
   const frame = useCurrentFrame();
   const { width } = useVideoConfig();
 
-  const x = interpolate(
-    frame,
-    [
-      0,
-      RANKING_PAYOFF_SWIPE,
-      RANKING_PAYOFF_DURATION - RANKING_PAYOFF_SWIPE,
-      RANKING_PAYOFF_DURATION,
-    ],
-    [width, 0, 0, -width],
-    {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-      easing: [SWIPE_EASING, Easing.linear, SWIPE_EASING],
-    },
-  );
+  const x = interpolate(frame, [0, RANKING_PAYOFF_SWIPE], [width, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: SWIPE_EASING,
+  });
 
   return (
     <AbsoluteFill
@@ -219,6 +208,7 @@ export const DpaTapFullVsl: React.FC = () => {
       >
         <GoogleRankingVsl />
       </Sequence>
+
       {/*
         Swipe + reel NFC. La frame interne repart de 0 à la frame globale 732,
         donc tous les `T.*`, les sons et les animations restent synchronisés
@@ -241,12 +231,11 @@ export const DpaTapFullVsl: React.FC = () => {
           incoming={<DpaTapReelBlue />}
         />
       </Sequence>
+
       {/*
-        Seconde jonction, rigoureusement identique à la première : l'écran
-        « +1 avis » — le reel gelé sur sa dernière frame — sort par la gauche
-        pendant que la page de présentation entre par la droite. À la frame
-        globale 1035 la piste est encore à `translateX(0)`, l'image est donc
-        exactement celle de la frame 1034.
+        Seconde jonction : la page Google, figée avec l'établissement en
+        première position, sort par la gauche pendant que le CTA final entre
+        par la droite. La page « +1 avis » ne réapparaît jamais.
       */}
       <Sequence
         from={CORE_DURATION}
@@ -256,8 +245,8 @@ export const DpaTapFullVsl: React.FC = () => {
       >
         <HorizontalSwipe
           outgoing={
-            <Freeze frame={DURATION_IN_FRAMES - 1}>
-              <DpaTapReelBlue />
+            <Freeze frame={119}>
+              <GoogleRankingHook />
             </Freeze>
           }
           incoming={<DpaSalesEndScene />}
@@ -265,14 +254,15 @@ export const DpaTapFullVsl: React.FC = () => {
       </Sequence>
 
       {/*
-        Rappel du hook entre 52 s et 57 s. Placé en dernier, il passe au-dessus
-        du montage existant sans en changer les durées ni les timecodes.
+        Rappel du hook à partir de 52 s. Placé en dernier, il masque la fin du
+        reel NFC, reste en première position après 57 s, puis cède exactement
+        sa place à la transition vers le CTA à `CORE_DURATION`.
       */}
       <Sequence
         from={RANKING_PAYOFF_START}
-        durationInFrames={RANKING_PAYOFF_DURATION}
+        durationInFrames={CORE_DURATION - RANKING_PAYOFF_START}
         premountFor={30}
-        name="Payoff : les avis font remonter l'établissement (52-57 s)"
+        name="Payoff : remontée Google puis maintien jusqu'au CTA"
       >
         <RankingPayoff />
       </Sequence>
