@@ -643,8 +643,13 @@ export const ReviewCollectionProblem: React.FC = () => {
               translate: `0px ${(1 - line2) * 24}px`,
             }}
           >
-            plus d’
-            <span style={{ color: BLUE }}>avis Google</span> ?
+            plus d’avis{" "}
+            {Array.from("Google").map((letter, index) => (
+              <span key={letter + index} style={{ color: G.logo[index] }}>
+                {letter}
+              </span>
+            ))}{" "}
+            ?
           </div>
           <div
             style={{
