@@ -194,41 +194,44 @@ const Marker: React.FC<{ x: number; y: number; big?: boolean }> = ({
   y,
   big = false,
 }) => {
-  const size = big ? 10 : 8;
-  const centerY = y - size * 0.2;
+  const size = big ? 12 : 10;
+  const centerY = y;
+  const pinPath = `M ${x} ${centerY + size * 2}
+    C ${x - size * 0.24} ${centerY + size * 1.56},
+      ${x - size * 1.32} ${centerY + size * 0.62},
+      ${x - size * 1.32} ${centerY}
+    C ${x - size * 1.32} ${centerY - size * 0.78},
+      ${x - size * 0.73} ${centerY - size * 1.38},
+      ${x} ${centerY - size * 1.38}
+    C ${x + size * 0.73} ${centerY - size * 1.38},
+      ${x + size * 1.32} ${centerY - size * 0.78},
+      ${x + size * 1.32} ${centerY}
+    C ${x + size * 1.32} ${centerY + size * 0.62},
+      ${x + size * 0.24} ${centerY + size * 1.56},
+      ${x} ${centerY + size * 2} Z`;
 
   return (
     <g>
-      <ellipse
-        cx={x}
-        cy={y + size * 1.45}
-        rx={size * 0.88}
-        ry={size * 0.32}
+      <path
+        d={pinPath}
         fill="#000000"
         opacity={0.2}
+        transform="translate(0 1.5)"
       />
       <path
-        d={`M ${x} ${y + size * 1.55}
-            C ${x - size * 0.2} ${y + size * 1.15},
-              ${x - size * 1.22} ${y + size * 0.62},
-              ${x - size * 1.22} ${centerY}
-            A ${size * 1.22} ${size * 1.22} 0 1 1
-              ${x + size * 1.22} ${centerY}
-            C ${x + size * 1.22} ${y + size * 0.62},
-              ${x + size * 0.2} ${y + size * 1.15},
-              ${x} ${y + size * 1.55} Z`}
+        d={pinPath}
         fill="#FFFFFF"
-        stroke="#BDC1C6"
-        strokeWidth={0.9}
+        stroke="#DADCE0"
+        strokeWidth={0.65}
         strokeLinejoin="round"
       />
       <circle
         cx={x}
         cy={centerY}
-        r={size * 0.78}
+        r={size * 0.99}
         fill={M.pin}
       />
-      <circle cx={x} cy={centerY} r={size * 0.32} fill="#FFFFFF" />
+      <circle cx={x} cy={centerY} r={size * 0.4} fill="#FFFFFF" />
     </g>
   );
 };
