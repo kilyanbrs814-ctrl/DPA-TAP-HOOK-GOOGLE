@@ -6,12 +6,11 @@
  * swipe horizontal vers la plaque NFC. Elle installe la difficulté commerciale
  * que la plaque vient résoudre :
  *
- *   1. trois clients satisfaits (coche verte, aucun texte) ;
+ *   1. un client satisfait (coche verte, aucun texte) ;
  *   2. le parcours classique pour déposer un avis : chercher, trouver la
  *      section des avis, rédiger et publier — trois étapes, uniquement des
  *      icônes ;
- *   3. le premier abandonne à l'étape 1, le deuxième à l'étape 2, seul le
- *      troisième va au bout et publie réellement son avis ;
+ *   3. le client va au bout et publie réellement son avis ;
  *   4. la question « Mais comment obtenir plus d'avis Google ? », tenue assez
  *      longtemps pour être prononcée en voix off.
  *
@@ -76,7 +75,7 @@ export const PROBLEM_TIMING = {
     { start: 60, arrivals: [72, 84], abandon: [90, 100] },
     { start: 96, arrivals: [108, 118, 128], abandon: null },
   ],
-  /** L'avis réellement publié par le troisième client. */
+/** L'avis réellement publié par le client vert. */
   review: [128, 144] as const,
   /** Effacement des profils, du parcours et de l'avis publié. */
   fadeOut: [158, 176] as const,
@@ -104,10 +103,11 @@ export const PROBLEM_DURATION = 262;
 const FRAME_W = 1080;
 const FRAME_H = 1920;
 
-/** Rangée des trois clients satisfaits. */
+/** Position du seul client satisfait. */
 const ROW_Y = 400;
-const ROW_X = [300, 540, 780] as const;
+const ROW_X = [300, 540, 540] as const;
 const AVATAR_SIZE = 132;
+const ACTIVE_CLIENT_INDEX = 2;
 
 /** Colonne du parcours : c'est elle que les clients descendent. */
 const LINE_X = 380;
@@ -359,25 +359,18 @@ export const ReviewCollectionProblem: React.FC = () => {
     easing: EASE_OUT,
   });
 
-  const clients = [0, 1, 2].map((i) => computeClientState(i, frame));
+  const activeClient = computeClientState(ACTIVE_CLIENT_INDEX, frame);
+  const activeJourney = T.journeys[ACTIVE_CLIENT_INDEX];
 
   /** Étape atteinte : la tuile et son nœud passent au bleu Google. */
-  const stepReached = STEP_Y.map((_, step) =>
-    T.journeys.reduce((reached, journey, i) => {
-      const arrival = journey.arrivals[step];
-      if (arrival === undefined) {
-        return reached;
-      }
-      return Math.max(
-        reached,
-        interpolate(frame, [arrival - 4, arrival + 4], [0, 1], {
-          extrapolateLeft: "clamp",
-          extrapolateRight: "clamp",
-          easing: EASE_OUT,
-        }) * Math.max(clients[i].alive, journey.abandon ? 0 : 1),
-      );
-    }, 0),
-  );
+  const stepReached = STEP_Y.map((_, step) => {
+    const arrival = activeJourney.arrivals[step];
+    return interpolate(frame, [arrival - 4, arrival + 4], [0, 1], {
+      extrapolateLeft: "clamp",
+      extrapolateRight: "clamp",
+      easing: EASE_OUT,
+    }) * activeClient.alive;
+  });
 
   /** Apparition de l'avis publié par le troisième client. */
   const published = interpolate(frame, [T.review[0], T.review[1]], [0, 1], {
@@ -452,19 +445,16 @@ export const ReviewCollectionProblem: React.FC = () => {
               là où il renonce et s'efface avec lui : le chemin devant lui
               redevient gris.
             */}
-            {clients.map((client, i) =>
-              client.alive > 0.01 && client.y > LINE_TOP ? (
-                <path
-                  key={`progress-${i}`}
-                  d={`M${LINE_X} ${LINE_TOP} L ${LINE_X} ${client.y}`}
-                  fill="none"
-                  stroke={i === 2 && published > 0 ? GREEN : BLUE}
-                  strokeWidth={5}
-                  strokeLinecap="round"
-                  opacity={client.alive}
-                />
-              ) : null,
-            )}
+            {activeClient.alive > 0.01 && activeClient.y > LINE_TOP ? (
+              <path
+                d={`M${LINE_X} ${LINE_TOP} L ${LINE_X} ${activeClient.y}`}
+                fill="none"
+                stroke={published > 0 ? GREEN : BLUE}
+                strokeWidth={5}
+                strokeLinecap="round"
+                opacity={activeClient.alive}
+              />
+            ) : null}
 
             {/* Nœuds et connecteurs pointillés vers les tuiles d'étape */}
             {STEP_Y.map((stepY, step) => (
@@ -535,54 +525,57 @@ export const ReviewCollectionProblem: React.FC = () => {
             );
           })}
 
-          {/* Les trois clients satisfaits */}
-          {clients.map((client, i) => (
-            <div
-              key={FLOW_REVIEWS[i].id}
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                width: client.size,
-                height: client.size,
-                opacity: client.alive,
-                filter: `saturate(${1 - client.dropout * 0.7})`,
-                translate: `${client.x - client.size / 2}px ${
-                  client.y - client.size / 2
-                }px`,
-              }}
-            >
+          {/* Le seul client satisfait */}
+          {([ACTIVE_CLIENT_INDEX] as const).map((i) => {
+            const client = activeClient;
+            return (
               <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  borderRadius: "50%",
-                  backgroundColor: FLOW_REVIEWS[i].avatarColor,
-                  color: G.white,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: client.size * 0.44,
-                  fontWeight: 500,
-                  lineHeight: 1,
-                  boxShadow: "0 6px 20px rgba(32,33,36,0.16)",
-                }}
-              >
-                {FLOW_REVIEWS[i].author.charAt(0)}
-              </div>
-              <div
+                key={FLOW_REVIEWS[i].id}
                 style={{
                   position: "absolute",
-                  right: -2,
-                  bottom: -2,
-                  // La coche disparaît avec l'avatar, jamais avant lui.
-                  opacity: 1,
+                  left: 0,
+                  top: 0,
+                  width: client.size,
+                  height: client.size,
+                  opacity: client.alive,
+                  filter: `saturate(${1 - client.dropout * 0.7})`,
+                  translate: `${client.x - client.size / 2}px ${
+                    client.y - client.size / 2
+                  }px`,
                 }}
               >
-                <SatisfiedCheck size={client.size * 0.36} />
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "50%",
+                    backgroundColor: FLOW_REVIEWS[i].avatarColor,
+                    color: G.white,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: client.size * 0.44,
+                    fontWeight: 500,
+                    lineHeight: 1,
+                    boxShadow: "0 6px 20px rgba(32,33,36,0.16)",
+                  }}
+                >
+                  {FLOW_REVIEWS[i].author.charAt(0)}
+                </div>
+                <div
+                  style={{
+                    position: "absolute",
+                    right: -2,
+                    bottom: -2,
+                    // La coche disparaît avec l'avatar, jamais avant lui.
+                    opacity: 1,
+                  }}
+                >
+                  <SatisfiedCheck size={client.size * 0.36} />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* L'avis réellement publié, au bout du parcours */}
           {published > 0 ? (
