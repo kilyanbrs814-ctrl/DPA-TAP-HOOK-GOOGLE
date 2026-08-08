@@ -100,7 +100,7 @@ const SWIPE_EASING = Easing.bezier(0.65, 0, 0.35, 1);
  * revient à un état antérieur, sans le critère « Réputation » en vert). Il lui
  * faut un niveau de séquence intermédiaire — ce qu'est une `<AbsoluteFill>`.
  */
-const HorizontalSwipe: React.FC<{
+export const HorizontalSwipe: React.FC<{
   /** Scène sortante, déjà enveloppée dans son `<Freeze>`. */
   readonly outgoing: React.ReactNode;
   /** Scène entrante, qui joue sa timeline locale dès la première frame. */

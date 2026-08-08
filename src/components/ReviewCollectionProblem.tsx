@@ -364,7 +364,19 @@ const computeClientState = (index: number, frame: number): ClientState => {
 
 /* -------------------------------------------------------------------------- */
 
-export const ReviewCollectionProblem: React.FC = () => {
+export const ReviewCollectionProblem: React.FC<{
+  /**
+   * Démonstration du parcours classique (clients, colonne, tuiles, avis
+   * publié). Vraie par défaut : `GoogleRankingVsl` — et donc `DpaTapFullVsl` —
+   * monte la scène sans aucune prop et reste rigoureusement inchangée.
+   *
+   * Le montage court la passe à `false` : il a coupé les 8,3 s de voix off qui
+   * commentent ce parcours, il ne doit donc pas en afficher la fin en train de
+   * s'effacer — le spectateur ne l'a jamais vu commencer. Seule la conclusion
+   * reste, avec son entrée échelonnée intacte.
+   */
+  readonly showJourney?: boolean;
+}> = ({ showJourney = true }) => {
   const frame = useCurrentFrame();
   const T = PROBLEM_TIMING;
   const demoFrame = frame - T.demoStart;
@@ -464,7 +476,7 @@ export const ReviewCollectionProblem: React.FC = () => {
       {/* ---------------------------------------------------------------- */}
       {/*  Parties 1 à 3 — clients, parcours, abandons, avis publié         */}
       {/* ---------------------------------------------------------------- */}
-      {demo > 0 ? (
+      {showJourney && demo > 0 ? (
         <div
           style={{
             position: "absolute",

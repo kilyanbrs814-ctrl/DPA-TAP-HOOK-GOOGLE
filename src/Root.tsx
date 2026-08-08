@@ -7,6 +7,10 @@ import {
   GoogleRankingVsl,
 } from "./compositions/GoogleRankingVsl";
 import { DpaTapFullVsl, FULL_DURATION } from "./compositions/DpaTapFullVsl";
+import {
+  DpaTapTikTokShort,
+  TIKTOK_SHORT_DURATION,
+} from "./compositions/DpaTapTikTokShort";
 
 /** Paramètres imposés par le brief du hook. */
 export const HOOK = {
@@ -44,6 +48,19 @@ export const RemotionRoot: React.FC = () => {
         id="DpaTapFullVsl"
         component={DpaTapFullVsl}
         durationInFrames={FULL_DURATION}
+        fps={HOOK.fps}
+        width={HOOK.width}
+        height={HOOK.height}
+      />
+      {/*
+        Version courte TikTok (~45 s) : mêmes composants, même voix off,
+        montage resserré. Ne modifie ni ne consomme les timecodes de
+        `DpaTapFullVsl` — sa timeline tient en tête de `DpaTapTikTokShort.tsx`.
+      */}
+      <Composition
+        id="DpaTapTikTokShort"
+        component={DpaTapTikTokShort}
+        durationInFrames={TIKTOK_SHORT_DURATION}
         fps={HOOK.fps}
         width={HOOK.width}
         height={HOOK.height}
