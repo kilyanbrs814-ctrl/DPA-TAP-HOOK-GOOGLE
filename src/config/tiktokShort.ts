@@ -264,6 +264,12 @@ export const TIKTOK_SHORT_AUDIO_FRAMES = TIKTOK_SHORT_AUDIO.segments.map(
 export const TIKTOK_SHORT_SOURCE_FRAMES = {
   /** Frame LOCALE où le parcours reprend après la question. */
   classicJourneySeek: 94,
+  /**
+   * Arrivées du client vert aux trois étapes. Les deux trajets entre les
+   * tuiles durent chacun 71 frames ; la dernière arrivée reste à la frame 227,
+   * donc la scène conserve strictement sa durée.
+   */
+  classicJourneyArrivals: [85, 156, 227] as const,
   /** Frame LOCALE de `ReviewCollectionProblem` affichée à `frictionStart`. */
   frictionSeek: 400,
   /** Frame de `GoogleRankingHook` où la fiche est stabilisée en 1re place. */
