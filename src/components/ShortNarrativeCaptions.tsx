@@ -55,7 +55,10 @@ const AnimatedPart: React.FC<{
 };
 
 
-/** Question d’ouverture du Short, construite au rythme de la voix off. */
+/**
+ * Question d’ouverture du Short, calée sur les attaques mesurées de la voix :
+ * Comment f0 · obtenir f14 · plus f25 · d’avis f33 · Google f45 · ? f56.
+ */
 export const OpeningQuestionWordByWord: React.FC = () => (
   <AbsoluteFill
     style={{
@@ -92,7 +95,7 @@ export const OpeningQuestionWordByWord: React.FC = () => (
         }}
       >
         <AnimatedPart revealFrame={0}>Comment</AnimatedPart>
-        <AnimatedPart revealFrame={5}>obtenir</AnimatedPart>
+        <AnimatedPart revealFrame={14}>obtenir</AnimatedPart>
       </div>
 
       <div
@@ -109,8 +112,9 @@ export const OpeningQuestionWordByWord: React.FC = () => (
           whiteSpace: "nowrap",
         }}
       >
-        <AnimatedPart revealFrame={10}>plus d’avis</AnimatedPart>
-        <AnimatedPart revealFrame={16}>
+        <AnimatedPart revealFrame={25}>plus</AnimatedPart>
+        <AnimatedPart revealFrame={33}>d’avis</AnimatedPart>
+        <AnimatedPart revealFrame={45}>
           <span style={{ display: "inline-flex" }}>
             {Array.from("Google").map((letter, index) => (
               <span key={letter + index} style={{ color: G.logo[index] }}>
@@ -119,11 +123,11 @@ export const OpeningQuestionWordByWord: React.FC = () => (
             ))}
           </span>
         </AnimatedPart>
-        <AnimatedPart revealFrame={22}>?</AnimatedPart>
+        <AnimatedPart revealFrame={56}>?</AnimatedPart>
       </div>
 
       <div style={{ marginTop: 48 }}>
-        <AnimatedPart revealFrame={28}>
+        <AnimatedPart revealFrame={58}>
           <StarsRating
             progress={5}
             size={40}
