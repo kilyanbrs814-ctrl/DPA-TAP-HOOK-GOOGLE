@@ -71,7 +71,10 @@ const OpeningQuestion: React.FC = () => (
 const ClassicJourney: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: G.white }}>
     <Sequence from={-SOURCE.classicJourneySeek}>
-      <ReviewCollectionProblem questionLead="Comment obtenir" />
+      <ReviewCollectionProblem
+        questionLead="Comment obtenir"
+        activeJourneyArrivals={SOURCE.classicJourneyArrivals}
+      />
     </Sequence>
   </AbsoluteFill>
 );
@@ -84,7 +87,9 @@ const ClassicJourney: React.FC = () => (
 const FrictionConclusion: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: G.white }}>
     <Sequence from={-SOURCE.frictionSeek}>
-      <ReviewCollectionProblem />
+      <ReviewCollectionProblem
+        activeJourneyArrivals={SOURCE.classicJourneyArrivals}
+      />
     </Sequence>
   </AbsoluteFill>
 );
@@ -93,7 +98,9 @@ const FrictionConclusion: React.FC = () => (
 const FrictionConclusionEnd: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: G.white }}>
     <Freeze frame={PROBLEM_DURATION - 1}>
-      <ReviewCollectionProblem />
+      <ReviewCollectionProblem
+        activeJourneyArrivals={SOURCE.classicJourneyArrivals}
+      />
     </Freeze>
   </AbsoluteFill>
 );
