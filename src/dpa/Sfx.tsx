@@ -1,12 +1,14 @@
 import { Audio } from "@remotion/media";
 import React from "react";
 import { Sequence, staticFile } from "remotion";
-import { ASSETS, T, starFrame } from "./constants";
+import { ASSETS } from "./constants";
+import { starFrameAt, useDpaTiming } from "./timing";
 
 /**
  * Sound design discret, mixé sous la voix off principale.
  */
 export const Sfx: React.FC = () => {
+  const T = useDpaTiming();
   return (
     <>
       <Sequence from={T.contact - 3} durationInFrames={10} layout="none">
@@ -23,7 +25,7 @@ export const Sfx: React.FC = () => {
       {new Array(5).fill(true).map((_, index) => (
         <Sequence
           key={index}
-          from={starFrame(index)}
+          from={starFrameAt(T, index)}
           durationInFrames={3}
           layout="none"
           hidden
