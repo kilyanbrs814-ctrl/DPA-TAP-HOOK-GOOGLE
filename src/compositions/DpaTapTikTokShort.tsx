@@ -1,7 +1,7 @@
 /**
  * DpaTapTikTokShort — version courte (≈ 45 s) destinée à TikTok.
  *
- * Même modèle que `DpaTapFullVsl` : six scènes posées les unes après les
+ * Même modèle que `DpaTapFullVsl` : cinq scènes posées les unes après les
  * autres, chacune dans sa `<Sequence>`. Aucun timing n'est écrit ici — ils
  * viennent tous de `config/tiktokShort.ts`, exactement comme `DpaTapFullVsl`
  * lit les siens dans `config/voiceover.ts`.
@@ -37,7 +37,6 @@ import {
 import { DpaTapReelBlue } from "../dpa/DpaTapReelBlue";
 import { DpaSalesEndScene } from "./DpaSalesEndScene";
 import { GoogleRankingHook } from "./GoogleRankingHook";
-import { GoogleRankingVsl } from "./GoogleRankingVsl";
 import { HorizontalSwipe } from "./DpaTapFullVsl";
 
 const F = TIKTOK_SHORT_FRAMES;
@@ -55,6 +54,14 @@ const FrozenHook: React.FC = () => (
   <Freeze frame={SOURCE.hookSettled}>
     <GoogleRankingHook />
   </Freeze>
+);
+
+/** Ouverture du Short : la question seule, sans « Mais » et sans scène avant. */
+const OpeningQuestion: React.FC = () => (
+  <ReviewCollectionProblem
+    showJourney={false}
+    questionLead="Comment obtenir"
+  />
 );
 
 /**
@@ -137,26 +144,11 @@ export const DpaTapTikTokShort: React.FC = () => {
       ))}
 
       <Sequence
-        from={F.hookStart}
-        durationInFrames={F.hookEnd - F.hookStart}
-        name="Hook Google"
+        from={F.questionStart}
+        durationInFrames={F.questionEnd - F.questionStart}
+        name="Question d'ouverture"
       >
-        <GoogleRankingHook />
-      </Sequence>
-
-      <Sequence
-        from={F.criteriaStart}
-        durationInFrames={F.criteriaEnd - F.criteriaStart}
-        name="Critères Google"
-      >
-        <HorizontalSwipe
-          outgoing={<FrozenHook />}
-          incoming={
-            <Sequence from={-SOURCE.criteriaSeek}>
-              <GoogleRankingVsl />
-            </Sequence>
-          }
-        />
+        <OpeningQuestion />
       </Sequence>
 
       <Sequence
