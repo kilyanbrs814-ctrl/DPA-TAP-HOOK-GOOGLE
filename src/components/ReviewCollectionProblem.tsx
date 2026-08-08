@@ -302,8 +302,16 @@ type ClientState = {
 };
 
 /** Fonction pure : aucun hook React, elle ne lit que la frame qu'on lui passe. */
-const computeClientState = (index: number, frame: number): ClientState => {
+const computeClientState = (
+  index: number,
+  frame: number,
+  activeJourneyArrivals?: readonly [number, number, number],
+): ClientState => {
   const journey = PROBLEM_TIMING.journeys[index];
+  const arrivals =
+    index === ACTIVE_CLIENT_INDEX && activeJourneyArrivals
+      ? activeJourneyArrivals
+      : journey.arrivals;
   const appear =
     PROBLEM_TIMING.clientsIn[0] + index * PROBLEM_TIMING.clientStagger;
 
@@ -333,8 +341,8 @@ const computeClientState = (index: number, frame: number): ClientState => {
 
   const y = interpolate(
     frame,
-    [journey.start, detach, ...journey.arrivals],
-    [ROW_Y, LINE_TOP, ...journey.arrivals.map((_, k) => STEP_Y[k])],
+    [journey.start, detach, ...arrivals],
+    [ROW_Y, LINE_TOP, ...arrivals.map((_, k) => STEP_Y[k])],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE_MOVE },
   );
 
@@ -381,7 +389,16 @@ export const ReviewCollectionProblem: React.FC<{
    * historique par défaut ; le Short peut retirer « Mais » sans la modifier.
    */
   readonly questionLead?: string;
-}> = ({ showJourney = true, questionLead = "Mais comment obtenir" }) => {
+  /**
+   * Frames d'arrivée du client vert aux trois étapes. Sans cette prop, les
+   * repères historiques de la Full VSL restent utilisés.
+   */
+  readonly activeJourneyArrivals?: readonly [number, number, number];
+}> = ({
+  showJourney = true,
+  questionLead = "Mais comment obtenir",
+  activeJourneyArrivals,
+}) => {
   const frame = useCurrentFrame();
   const T = PROBLEM_TIMING;
   const demoFrame = frame - T.demoStart;
@@ -411,12 +428,17 @@ export const ReviewCollectionProblem: React.FC<{
     },
   );
 
-  const activeClient = computeClientState(ACTIVE_CLIENT_INDEX, demoFrame);
-  const activeJourney = T.journeys[ACTIVE_CLIENT_INDEX];
+  const activeClient = computeClientState(
+    ACTIVE_CLIENT_INDEX,
+    demoFrame,
+    activeJourneyArrivals,
+  );
+  const activeArrivals =
+    activeJourneyArrivals ?? T.journeys[ACTIVE_CLIENT_INDEX].arrivals;
 
   /** Étape atteinte : la tuile et son nœud passent au bleu Google. */
   const stepReached = STEP_Y.map((_, step) => {
-    const arrival = activeJourney.arrivals[step];
+    const arrival = activeArrivals[step];
     return interpolate(demoFrame, [arrival - 4, arrival + 4], [0, 1], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
@@ -736,82 +758,3 @@ export const ReviewCollectionProblem: React.FC<{
             />
           </div>
         </div>
-      ) : null}
-
-      {/* ---------------------------------------------------------------- */}
-      {/*  Conclusion — pourquoi le parcours classique ne suffit pas       */}
-      {/* ---------------------------------------------------------------- */}
-      {conclusionIcon > 0 ? (
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            width: FRAME_W,
-            height: FRAME_H,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            paddingLeft: 72,
-            paddingRight: 72,
-            boxSizing: "border-box",
-            textAlign: "center",
-          }}
-        >
-          <div
-            style={{
-              width: 180,
-              height: 180,
-              borderRadius: 36,
-              border: `2px solid ${G.border}`,
-              backgroundColor: G.white,
-              boxShadow: "0 8px 28px rgba(32,33,36,0.08)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 62,
-              opacity: conclusionIcon * 0.72,
-              translate: `0px ${(1 - conclusionIcon) * 24}px`,
-              scale: (0.94 + conclusionIcon * 0.06).toString(),
-            }}
-          >
-            <SearchStepIcon />
-          </div>
-
-          <div
-            style={{
-              fontSize: 76,
-              fontWeight: 700,
-              color: G.textPrimary,
-              lineHeight: 1.16,
-              opacity: conclusionTitle,
-              translate: `0px ${(1 - conclusionTitle) * 24}px`,
-            }}
-          >
-            Presque aucun client
-            <br />
-            ne fait cette recherche.
-          </div>
-
-          <div
-            style={{
-              marginTop: 42,
-              maxWidth: 850,
-              fontSize: 43,
-              fontWeight: 400,
-              color: G.textSecondary,
-              lineHeight: 1.38,
-              opacity: conclusionReason,
-              translate: `0px ${(1 - conclusionReason) * 20}px`,
-            }}
-          >
-            Ils oublient… ou n’ont simplement pas envie
-            <br />
-            de faire toutes ces étapes.
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
-};
