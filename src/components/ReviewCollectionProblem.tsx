@@ -394,10 +394,16 @@ export const ReviewCollectionProblem: React.FC<{
    * repères historiques de la Full VSL restent utilisés.
    */
   readonly activeJourneyArrivals?: readonly [number, number, number];
+  /**
+   * Fenêtre d'apparition de la carte d'avis publiée. Sans cette prop, la Full
+   * VSL conserve ses repères historiques.
+   */
+  readonly publishedReviewFrames?: readonly [number, number];
 }> = ({
   showJourney = true,
   questionLead = "Mais comment obtenir",
   activeJourneyArrivals,
+  publishedReviewFrames,
 }) => {
   const frame = useCurrentFrame();
   const T = PROBLEM_TIMING;
@@ -447,7 +453,8 @@ export const ReviewCollectionProblem: React.FC<{
   });
 
   /** Apparition de l'avis publié par le client vert. */
-  const published = interpolate(demoFrame, [T.review[0], T.review[1]], [0, 1], {
+  const reviewFrames = publishedReviewFrames ?? T.review;
+  const published = interpolate(demoFrame, reviewFrames, [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: EASE_OUT,
