@@ -8,8 +8,9 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { ASSETS, PHONE, SPRINGS, T, TRANSITION_FRAMES } from "./constants";
+import { ASSETS, PHONE, SPRINGS, TRANSITION_FRAMES } from "./constants";
 import { TapRing } from "./NfcWaves";
+import { useDpaTiming } from "./timing";
 
 const NOTIF_WIDTH = 402;
 const NOTIF_HEIGHT = Math.round((NOTIF_WIDTH * 267) / 1127);
@@ -28,6 +29,7 @@ const NOTIF_TOP = 62;
 export const NotificationScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const T = useDpaTiming();
 
   const enter = spring({
     frame: frame - T.notifStart,
