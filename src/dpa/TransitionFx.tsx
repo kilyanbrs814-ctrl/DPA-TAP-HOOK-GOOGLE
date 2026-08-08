@@ -1,6 +1,6 @@
 import React from "react";
 import { Easing, interpolate, useCurrentFrame } from "remotion";
-import { T } from "./constants";
+import { useDpaTiming } from "./timing";
 
 /**
  * Very short bright transition when "Publier" is pressed — the only flash left
@@ -13,6 +13,7 @@ import { T } from "./constants";
  */
 export const PublishFlash: React.FC = () => {
   const frame = useCurrentFrame();
+  const T = useDpaTiming();
 
   const opacity = interpolate(
     frame,
