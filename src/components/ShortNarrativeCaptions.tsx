@@ -59,10 +59,18 @@ const AnimatedPart: React.FC<{
  * Question d’ouverture du Short, calée sur les attaques mesurées de la voix :
  * Comment f0 · obtenir f14 · plus f25 · d’avis f33 · Google f45 · ? f56.
  */
-export const OpeningQuestionWordByWord: React.FC = () => (
-  <AbsoluteFill
-    style={{
-      backgroundColor: G.white,
+export const OpeningQuestionWordByWord: React.FC = () => {
+  const frame = useCurrentFrame();
+
+  return (
+    <AbsoluteFill
+      style={{
+        backgroundColor: G.white,
+        opacity: interpolate(frame, [63, 75], [1, 0], {
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+          easing: Easing.inOut(Easing.cubic),
+        }),
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -136,9 +144,11 @@ export const OpeningQuestionWordByWord: React.FC = () => (
           />
         </AnimatedPart>
       </div>
-    </div>
-  </AbsoluteFill>
-);
+      </div>
+    </AbsoluteFill>
+  );
+};
+
 const TooLongPhrase: React.FC<{ readonly durationInFrames: number }> = ({
   durationInFrames,
 }) => {
