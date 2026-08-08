@@ -67,27 +67,54 @@ const OpeningQuestion: React.FC = () => <OpeningQuestionWordByWord />;
  * Parcours classique repris tel quel de la Full VSL : client satisfait,
  * recherche Google, section des avis, rédaction puis avis publié.
  */
-const ClassicJourney: React.FC = () => (
-  <AbsoluteFill style={{ backgroundColor: G.white }}>
-    <Sequence from={-SOURCE.classicJourneySeek}>
-      <ReviewCollectionProblem
-        questionLead="Comment obtenir"
-        activeJourneyArrivals={SOURCE.classicJourneyArrivals}
-        publishedReviewFrames={SOURCE.classicJourneyReview}
-      />
-    </Sequence>
-  </AbsoluteFill>
-);
+const CLASSIC_JOURNEY_DURATION =
+  F.classicJourneyEnd - F.classicJourneyStart;
+const CLASSIC_JOURNEY_FADE_DURATION = 12;
+
+const ClassicJourney: React.FC = () => {
+  const frame = useCurrentFrame();
+
+  return (
+    <AbsoluteFill style={{ backgroundColor: G.white }}>
+      <AbsoluteFill
+        style={{
+          opacity: interpolate(
+            frame,
+            [
+              CLASSIC_JOURNEY_DURATION - CLASSIC_JOURNEY_FADE_DURATION,
+              CLASSIC_JOURNEY_DURATION - 1,
+            ],
+            [1, 0],
+            {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+              easing: Easing.inOut(Easing.cubic),
+            },
+          ),
+        }}
+      >
+        <Sequence from={-SOURCE.classicJourneySeek}>
+          <ReviewCollectionProblem
+            questionLead="Comment obtenir"
+            activeJourneyArrivals={SOURCE.classicJourneyArrivals}
+            publishedReviewFrames={SOURCE.classicJourneyReview}
+          />
+        </Sequence>
+      </AbsoluteFill>
+    </AbsoluteFill>
+  );
+};
 
 /**
  * La conclusion « Presque aucun client… », sur fond blanc (elle n'a pas de fond
- * propre). Le parcours reste monté pendant son fondu de sortie, exactement
- * comme dans `DpaTapFullVsl`.
+ * propre). Le parcours du Short a déjà disparu avant son entrée : il ne doit
+ * jamais rester visible sous ce texte.
  */
 const FrictionConclusion: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: G.white }}>
     <Sequence from={-SOURCE.frictionSeek}>
       <ReviewCollectionProblem
+        showJourney={false}
         activeJourneyArrivals={SOURCE.classicJourneyArrivals}
         publishedReviewFrames={SOURCE.classicJourneyReview}
       />
@@ -100,6 +127,7 @@ const FrictionConclusionEnd: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: G.white }}>
     <Freeze frame={PROBLEM_DURATION - 1}>
       <ReviewCollectionProblem
+        showJourney={false}
         activeJourneyArrivals={SOURCE.classicJourneyArrivals}
         publishedReviewFrames={SOURCE.classicJourneyReview}
       />
