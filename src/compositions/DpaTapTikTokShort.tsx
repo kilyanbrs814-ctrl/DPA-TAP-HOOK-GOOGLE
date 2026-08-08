@@ -34,7 +34,10 @@ import {
   PROBLEM_DURATION,
   ReviewCollectionProblem,
 } from "../components/ReviewCollectionProblem";
-import { ShortNarrativeCaptions } from "../components/ShortNarrativeCaptions";
+import {
+  OpeningQuestionWordByWord,
+  ShortNarrativeCaptions,
+} from "../components/ShortNarrativeCaptions";
 import { DpaTapReelBlue } from "../dpa/DpaTapReelBlue";
 import { DpaSalesEndScene } from "./DpaSalesEndScene";
 import { GoogleRankingHook } from "./GoogleRankingHook";
@@ -57,13 +60,8 @@ const FrozenHook: React.FC = () => (
   </Freeze>
 );
 
-/** Ouverture du Short : la question seule, sans « Mais » et sans scène avant. */
-const OpeningQuestion: React.FC = () => (
-  <ReviewCollectionProblem
-    showJourney={false}
-    questionLead="Comment obtenir"
-  />
-);
+/** Ouverture du Short : question construite mot par mot, puis tenue. */
+const OpeningQuestion: React.FC = () => <OpeningQuestionWordByWord />;
 
 /**
  * Parcours classique repris tel quel de la Full VSL : client satisfait,
