@@ -63,8 +63,8 @@ const TooLongPhrase: React.FC<{ readonly durationInFrames: number }> = ({
       <div
         style={{
           position: "absolute",
-          left: 60,
-          right: 310,
+          left: 58,
+          right: 58,
           top: 400,
           display: "flex",
           justifyContent: "center",
