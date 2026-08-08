@@ -26,6 +26,7 @@ import { G } from "../config/google-ui";
 import {
   TIKTOK_SHORT_AUDIO,
   TIKTOK_SHORT_AUDIO_FRAMES,
+  TIKTOK_SHORT_DPA_TIMING,
   TIKTOK_SHORT_FRAMES,
   TIKTOK_SHORT_SOURCE_FRAMES,
 } from "../config/tiktokShort";
@@ -174,7 +175,7 @@ export const DpaTapTikTokShort: React.FC = () => {
       >
         <HorizontalSwipe
           outgoing={<FrictionConclusionEnd />}
-          incoming={<DpaTapReelBlue />}
+          incoming={<DpaTapReelBlue timing={TIKTOK_SHORT_DPA_TIMING} />}
         />
       </Sequence>
 
