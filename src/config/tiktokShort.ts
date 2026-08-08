@@ -270,6 +270,11 @@ export const TIKTOK_SHORT_SOURCE_FRAMES = {
    * donc la scène conserve strictement sa durée.
    */
   classicJourneyArrivals: [85, 156, 227] as const,
+  /**
+   * La carte d'avis commence 8 frames après l'arrivée à la dernière étape et
+   * termine son entrée à la frame 260. La scène elle-même ne bouge pas.
+   */
+  classicJourneyReview: [235, 260] as const,
   /** Frame LOCALE de `ReviewCollectionProblem` affichée à `frictionStart`. */
   frictionSeek: 400,
   /** Frame de `GoogleRankingHook` où la fiche est stabilisée en 1re place. */
