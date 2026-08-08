@@ -16,13 +16,14 @@
  */
 
 import { VOICEOVER, secondsToFrame } from "./voiceover";
+import type { DpaTiming } from "../dpa/timing";
 
 /**
- * Bornes des six scènes — LES SEULES VALEURS À MODIFIER.
+ * Repères visuels du Short — CE SONT LES VALEURS À MODIFIER.
  *
- * Déplacer une borne déplace réellement la scène, et tout ce qu'elle contient
- * suit : les repères internes plus bas sont exprimés en décalage depuis ces
- * bornes, jamais en seconde absolue.
+ * Dans le reel NFC, chaque ligne pilote réellement sa propre animation. Par
+ * exemple, modifier `phoneStart` déplace le téléphone sans déplacer la plaque,
+ * la notification ou la page Google.
  */
 const SCENE_BEATS = {
   hookStart: 0,
@@ -32,11 +33,25 @@ const SCENE_BEATS = {
   criteriaEnd: 13.8,
 
   frictionStart: 13.8,
-  frictionEnd: 17.133333,
+  frictionEnd: 21.03,
 
-  /** Le reel NFC. 636 frames = `DURATION_IN_FRAMES` : garder cet écart. */
-  plaqueVisualStart: 17.133333,
-  plaqueVisualEnd: 42.333333,
+  // ── Reel NFC : chaque ligne contrôle vraiment sa sous-scène ──
+  plaqueVisualStart: 21.03, // transition vers la plaque
+  plaqueMoveStart: 24.2, // la plaque quitte le centre
+  phoneStart: 25.0, // entrée du téléphone
+  phoneContact: 27.8, // contact NFC et ondes
+  notificationStart: 29.266667, // apparition de la notification
+  notificationTap: 30.066667, // pression sur la notification
+  safariStart: 30.233333, // ouverture de Safari dans l'iPhone
+  phoneCloseUpStart: 30.433333, // début du rapprochement de l'iPhone
+  phoneCloseUpEnd: 31.366667, // iPhone arrivé en gros plan
+  pageOpenStart: 32.133333, // apparition de la page d'avis Google
+  reviewStart: 34.566667, // page prête pour l'interaction
+  starsStart: 35.166667, // première étoile sélectionnée
+  publishStart: 37.6, // pression sur « Publier »
+  publishFlash: 37.733333, // flash de confirmation
+  successStart: 38.2, // écran « +1 avis »
+  plaqueVisualEnd: 42.333333, // fin du reel sous le payoff
 
   payoffStart: 33.1,
   payoffEnd: 42.333333,
@@ -63,12 +78,6 @@ const INTERNAL_OFFSETS = {
   frictionSentence2Start: 3.566667, // « Ils oublient… »
   frictionSentence3Start: 6.166667, // dernière phrase du bloc
 
-  /** Depuis `plaqueVisualStart`. */
-  plaqueStart: 0.766667, // swipe terminé, plaque entièrement centrée
-  plaqueMoveStart: 7.066667, // la plaque quitte le centre
-  phoneStart: 7.866667, // le téléphone entre par le bas
-  phoneContact: 10.666667, // contact NFC : ondes et micro-rebond
-
   /** Depuis `payoffStart`. */
   rankingClimbStart: 1.733333, // premier dépassement de concurrent
   rankingFirstPlace: 3.666667, // la fiche atteint la 1re place
@@ -90,13 +99,6 @@ export const TIKTOK_SHORT = {
       SCENE_BEATS.frictionStart + INTERNAL_OFFSETS.frictionSentence2Start,
     frictionSentence3Start:
       SCENE_BEATS.frictionStart + INTERNAL_OFFSETS.frictionSentence3Start,
-
-    plaqueStart: SCENE_BEATS.plaqueVisualStart + INTERNAL_OFFSETS.plaqueStart,
-    plaqueMoveStart:
-      SCENE_BEATS.plaqueVisualStart + INTERNAL_OFFSETS.plaqueMoveStart,
-    phoneStart: SCENE_BEATS.plaqueVisualStart + INTERNAL_OFFSETS.phoneStart,
-    phoneContact:
-      SCENE_BEATS.plaqueVisualStart + INTERNAL_OFFSETS.phoneContact,
 
     rankingClimbStart:
       SCENE_BEATS.payoffStart + INTERNAL_OFFSETS.rankingClimbStart,
@@ -132,10 +134,22 @@ export const TIKTOK_SHORT_FRAMES = {
   frictionEnd: shortSecondsToFrame(TIKTOK_SHORT.beats.frictionEnd),
 
   plaqueVisualStart: shortSecondsToFrame(TIKTOK_SHORT.beats.plaqueVisualStart),
-  plaqueStart: shortSecondsToFrame(TIKTOK_SHORT.beats.plaqueStart),
   plaqueMoveStart: shortSecondsToFrame(TIKTOK_SHORT.beats.plaqueMoveStart),
   phoneStart: shortSecondsToFrame(TIKTOK_SHORT.beats.phoneStart),
   phoneContact: shortSecondsToFrame(TIKTOK_SHORT.beats.phoneContact),
+  notificationStart: shortSecondsToFrame(TIKTOK_SHORT.beats.notificationStart),
+  notificationTap: shortSecondsToFrame(TIKTOK_SHORT.beats.notificationTap),
+  safariStart: shortSecondsToFrame(TIKTOK_SHORT.beats.safariStart),
+  phoneCloseUpStart: shortSecondsToFrame(
+    TIKTOK_SHORT.beats.phoneCloseUpStart,
+  ),
+  phoneCloseUpEnd: shortSecondsToFrame(TIKTOK_SHORT.beats.phoneCloseUpEnd),
+  pageOpenStart: shortSecondsToFrame(TIKTOK_SHORT.beats.pageOpenStart),
+  reviewStart: shortSecondsToFrame(TIKTOK_SHORT.beats.reviewStart),
+  starsStart: shortSecondsToFrame(TIKTOK_SHORT.beats.starsStart),
+  publishStart: shortSecondsToFrame(TIKTOK_SHORT.beats.publishStart),
+  publishFlash: shortSecondsToFrame(TIKTOK_SHORT.beats.publishFlash),
+  successStart: shortSecondsToFrame(TIKTOK_SHORT.beats.successStart),
   plaqueVisualEnd: shortSecondsToFrame(TIKTOK_SHORT.beats.plaqueVisualEnd),
 
   payoffStart: shortSecondsToFrame(TIKTOK_SHORT.beats.payoffStart),
@@ -147,6 +161,37 @@ export const TIKTOK_SHORT_FRAMES = {
   ctaStart: shortSecondsToFrame(TIKTOK_SHORT.beats.ctaStart),
   ctaEnd: shortSecondsToFrame(TIKTOK_SHORT.beats.ctaEnd),
 } as const;
+
+/**
+ * Timeline LOCALE réellement consommée par `DpaTapReelBlue` dans le Short.
+ * Chaque repère éditable ci-dessus est traduit depuis la timeline globale du
+ * Short vers la frame locale du reel. `DpaTapFullVsl` n'utilise pas cet objet.
+ */
+const dpaLocal = (shortFrame: number) =>
+  shortFrame - TIKTOK_SHORT_FRAMES.plaqueVisualStart;
+
+export const TIKTOK_SHORT_DPA_TIMING: DpaTiming = {
+  hookStart: 0,
+  plaqueMove: dpaLocal(TIKTOK_SHORT_FRAMES.plaqueMoveStart),
+  contactStart: dpaLocal(TIKTOK_SHORT_FRAMES.phoneStart),
+  contact: dpaLocal(TIKTOK_SHORT_FRAMES.phoneContact),
+  notifStart: dpaLocal(TIKTOK_SHORT_FRAMES.notificationStart),
+  notifTap: dpaLocal(TIKTOK_SHORT_FRAMES.notificationTap),
+  /** Le retrait de la bannière commence une frame avant Safari. */
+  notifExitStart: dpaLocal(TIKTOK_SHORT_FRAMES.safariStart) - 1,
+  safariStart: dpaLocal(TIKTOK_SHORT_FRAMES.safariStart),
+  pageStart: dpaLocal(TIKTOK_SHORT_FRAMES.pageOpenStart),
+  closeUpStart: dpaLocal(TIKTOK_SHORT_FRAMES.phoneCloseUpStart),
+  closeUpEnd: dpaLocal(TIKTOK_SHORT_FRAMES.phoneCloseUpEnd),
+  reviewStart: dpaLocal(TIKTOK_SHORT_FRAMES.reviewStart),
+  starFirst: dpaLocal(TIKTOK_SHORT_FRAMES.starsStart),
+  starStep: 2,
+  starReact: 4,
+  publishTap: dpaLocal(TIKTOK_SHORT_FRAMES.publishStart),
+  publishFlash: dpaLocal(TIKTOK_SHORT_FRAMES.publishFlash),
+  successStart: dpaLocal(TIKTOK_SHORT_FRAMES.successStart),
+  end: dpaLocal(TIKTOK_SHORT_FRAMES.plaqueVisualEnd),
+};
 
 /* -------------------------------------------------------------------------- */
 /*  Voix off — coupes dans le fichier d'origine                               */
