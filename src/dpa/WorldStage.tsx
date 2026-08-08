@@ -7,7 +7,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import { PHONE, PHONE_CLOSEUP, PLAQUE, SPRINGS, T } from "./constants";
+import { PHONE, PHONE_CLOSEUP, PLAQUE, SPRINGS } from "./constants";
 import { NfcWaves } from "./NfcWaves";
 import { NotificationScene } from "./NotificationScene";
 import { PhoneMockup, PhoneWallpaper } from "./PhoneMockup";
@@ -15,6 +15,7 @@ import { PhoneReviewScreen } from "./PhoneReviewScreen";
 import { PhoneSuccessScreen } from "./PhoneSuccessScreen";
 import { PlaqueScene, plaqueAnchorAt } from "./PlaqueScene";
 import { PublishFlash } from "./TransitionFx";
+import { useDpaTiming } from "./timing";
 
 /**
  * The physical stage. Three transforms live here and they are deliberately kept
@@ -33,6 +34,7 @@ import { PublishFlash } from "./TransitionFx";
 export const WorldStage: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const T = useDpaTiming();
 
   const approach = spring({
     frame: frame - T.contactStart,
@@ -65,7 +67,7 @@ export const WorldStage: React.FC = () => {
     easing: Easing.bezier(0.33, 0, 0.2, 1),
   });
 
-  const anchor = plaqueAnchorAt(frame);
+  const anchor = plaqueAnchorAt(frame, T);
   const phoneVisible = frame >= T.contactStart - 6;
 
   const translateX =
