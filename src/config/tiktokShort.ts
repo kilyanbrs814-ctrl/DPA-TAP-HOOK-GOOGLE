@@ -32,10 +32,10 @@ const SCENE_BEATS = {
   criteriaEnd: 13.8,
 
   frictionStart: 13.8,
-  frictionEnd: 17.133333,
+  frictionEnd: 21.03,
 
-  /** Le reel NFC. 636 frames = `DURATION_IN_FRAMES` : garder cet écart. */
-  plaqueVisualStart: 17.133333,
+  /** Transition vers la plaque NFC à 00:21,03 (frame 631 à 30 fps). */
+  plaqueVisualStart: 21.03,
   plaqueVisualEnd: 42.333333,
 
   payoffStart: 33.1,
