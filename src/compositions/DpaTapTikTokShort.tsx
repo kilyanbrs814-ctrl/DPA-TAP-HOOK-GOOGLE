@@ -74,6 +74,7 @@ const ClassicJourney: React.FC = () => (
       <ReviewCollectionProblem
         questionLead="Comment obtenir"
         activeJourneyArrivals={SOURCE.classicJourneyArrivals}
+        publishedReviewFrames={SOURCE.classicJourneyReview}
       />
     </Sequence>
   </AbsoluteFill>
@@ -89,6 +90,7 @@ const FrictionConclusion: React.FC = () => (
     <Sequence from={-SOURCE.frictionSeek}>
       <ReviewCollectionProblem
         activeJourneyArrivals={SOURCE.classicJourneyArrivals}
+        publishedReviewFrames={SOURCE.classicJourneyReview}
       />
     </Sequence>
   </AbsoluteFill>
@@ -100,6 +102,7 @@ const FrictionConclusionEnd: React.FC = () => (
     <Freeze frame={PROBLEM_DURATION - 1}>
       <ReviewCollectionProblem
         activeJourneyArrivals={SOURCE.classicJourneyArrivals}
+        publishedReviewFrames={SOURCE.classicJourneyReview}
       />
     </Freeze>
   </AbsoluteFill>
