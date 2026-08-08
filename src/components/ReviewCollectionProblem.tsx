@@ -758,3 +758,82 @@ export const ReviewCollectionProblem: React.FC<{
             />
           </div>
         </div>
+      ) : null}
+
+      {/* ---------------------------------------------------------------- */}
+      {/*  Conclusion — pourquoi le parcours classique ne suffit pas       */}
+      {/* ---------------------------------------------------------------- */}
+      {conclusionIcon > 0 ? (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: FRAME_W,
+            height: FRAME_H,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingLeft: 72,
+            paddingRight: 72,
+            boxSizing: "border-box",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              width: 180,
+              height: 180,
+              borderRadius: 36,
+              border: `2px solid ${G.border}`,
+              backgroundColor: G.white,
+              boxShadow: "0 8px 28px rgba(32,33,36,0.08)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 62,
+              opacity: conclusionIcon * 0.72,
+              translate: `0px ${(1 - conclusionIcon) * 24}px`,
+              scale: (0.94 + conclusionIcon * 0.06).toString(),
+            }}
+          >
+            <SearchStepIcon />
+          </div>
+
+          <div
+            style={{
+              fontSize: 76,
+              fontWeight: 700,
+              color: G.textPrimary,
+              lineHeight: 1.16,
+              opacity: conclusionTitle,
+              translate: `0px ${(1 - conclusionTitle) * 24}px`,
+            }}
+          >
+            Presque aucun client
+            <br />
+            ne fait cette recherche.
+          </div>
+
+          <div
+            style={{
+              marginTop: 42,
+              maxWidth: 850,
+              fontSize: 43,
+              fontWeight: 400,
+              color: G.textSecondary,
+              lineHeight: 1.38,
+              opacity: conclusionReason,
+              translate: `0px ${(1 - conclusionReason) * 20}px`,
+            }}
+          >
+            Ils oublient… ou n’ont simplement pas envie
+            <br />
+            de faire toutes ces étapes.
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+};
