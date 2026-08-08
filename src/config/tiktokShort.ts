@@ -26,38 +26,36 @@ import type { DpaTiming } from "../dpa/timing";
  * la notification ou la page Google.
  */
 const SCENE_BEATS = {
-  hookStart: 0,
-  hookEnd: 4.0,
+  // ── Ouverture : aucune scène avant cette question ──
+  questionStart: 0,
+  questionEnd: 2.533333, // fin de son fondu de sortie (frame 76)
 
-  criteriaStart: 4.0,
-  criteriaEnd: 13.8,
-
-  frictionStart: 13.8,
-  frictionEnd: 21.03,
+  frictionStart: 2.533333,
+  frictionEnd: 9.763333,
 
   // ── Reel NFC : chaque ligne contrôle vraiment sa sous-scène ──
-  plaqueVisualStart: 21.03, // transition vers la plaque
-  plaqueMoveStart: 24.2, // la plaque quitte le centre
-  phoneStart: 25.0, // entrée du téléphone
-  phoneContact: 27.8, // contact NFC et ondes
-  notificationStart: 29.266667, // apparition de la notification
-  notificationTap: 30.066667, // pression sur la notification
-  safariStart: 30.233333, // ouverture de Safari dans l'iPhone
-  phoneCloseUpStart: 30.433333, // début du rapprochement de l'iPhone
-  phoneCloseUpEnd: 31.366667, // iPhone arrivé en gros plan
-  pageOpenStart: 32.133333, // apparition de la page d'avis Google
-  reviewStart: 34.566667, // page prête pour l'interaction
-  starsStart: 35.166667, // première étoile sélectionnée
-  publishStart: 37.6, // pression sur « Publier »
-  publishFlash: 37.733333, // flash de confirmation
-  successStart: 38.2, // écran « +1 avis »
-  plaqueVisualEnd: 42.333333, // fin du reel sous le payoff
+  plaqueVisualStart: 9.763333, // transition vers la plaque
+  plaqueMoveStart: 12.933333, // la plaque quitte le centre
+  phoneStart: 13.733333, // entrée du téléphone
+  phoneContact: 16.533333, // contact NFC et ondes
+  notificationStart: 18.0, // apparition de la notification
+  notificationTap: 18.8, // pression sur la notification
+  safariStart: 18.966667, // ouverture de Safari dans l'iPhone
+  phoneCloseUpStart: 19.166667, // début du rapprochement de l'iPhone
+  phoneCloseUpEnd: 20.1, // iPhone arrivé en gros plan
+  pageOpenStart: 20.866667, // apparition de la page d'avis Google
+  reviewStart: 23.3, // page prête pour l'interaction
+  starsStart: 23.9, // première étoile sélectionnée
+  publishStart: 26.333333, // pression sur « Publier »
+  publishFlash: 26.466667, // flash de confirmation
+  successStart: 26.933333, // écran « +1 avis »
+  plaqueVisualEnd: 31.066667, // fin du reel sous le payoff
 
-  payoffStart: 33.1,
-  payoffEnd: 42.333333,
+  payoffStart: 21.833333,
+  payoffEnd: 31.066667,
 
-  ctaStart: 42.333333,
-  ctaEnd: 44.666667,
+  ctaStart: 31.066667,
+  ctaEnd: 33.4,
 } as const;
 
 /** Entrée de la page Google au début du payoff — 0,4 s = 12 frames. */
@@ -115,11 +113,8 @@ export const shortSecondsToFrame = (seconds: number) =>
 export const TIKTOK_SHORT_FRAMES = {
   total: shortSecondsToFrame(TIKTOK_SHORT.durationSeconds),
 
-  hookStart: shortSecondsToFrame(TIKTOK_SHORT.beats.hookStart),
-  hookEnd: shortSecondsToFrame(TIKTOK_SHORT.beats.hookEnd),
-
-  criteriaStart: shortSecondsToFrame(TIKTOK_SHORT.beats.criteriaStart),
-  criteriaEnd: shortSecondsToFrame(TIKTOK_SHORT.beats.criteriaEnd),
+  questionStart: shortSecondsToFrame(TIKTOK_SHORT.beats.questionStart),
+  questionEnd: shortSecondsToFrame(TIKTOK_SHORT.beats.questionEnd),
 
   frictionStart: shortSecondsToFrame(TIKTOK_SHORT.beats.frictionStart),
   frictionSentence1Start: shortSecondsToFrame(
@@ -203,23 +198,17 @@ export const TIKTOK_SHORT_DPA_TIMING: DpaTiming = {
  * posé sur la frame de la scène à laquelle il appartient — d'où `shortStart`,
  * qui reprend toujours une borne de `TIKTOK_SHORT.beats`.
  *
- * Les deux coupes (4,00 s et 13,80 s dans le Short) tombent dans un silence
- * mesuré du MP3, jamais en plein mot. Les extraits « friction » et « dpa » se
- * touchent (40,033 s → 40,033 s) : de 13,80 s à la fin, la voix est continue.
+ * Le Short démarre directement sur « Comment obtenir plus d'avis Google ? ».
+ * Le mot « Mais » de la source (19,629 → 19,855 s) est retiré : la coupe part
+ * à 19,966667 s, juste avant l'attaque mesurée de « Comment » à 19,9703 s.
  */
 export const TIKTOK_SHORT_AUDIO = {
   asset: VOICEOVER.asset,
   segments: [
     {
-      name: "hook",
-      shortStart: TIKTOK_SHORT.beats.hookStart,
-      sourceStart: 0,
-      sourceEnd: 3.366667,
-    },
-    {
-      name: "criteria",
-      shortStart: TIKTOK_SHORT.beats.criteriaStart,
-      sourceStart: 12.033333,
+      name: "question",
+      shortStart: TIKTOK_SHORT.beats.questionStart,
+      sourceStart: 19.966667,
       sourceEnd: 21.833333,
     },
     {
@@ -265,8 +254,6 @@ export const TIKTOK_SHORT_AUDIO_FRAMES = TIKTOK_SHORT_AUDIO.segments.map(
  * Elles n'ont donc rien à faire dans `beats`.
  */
 export const TIKTOK_SHORT_SOURCE_FRAMES = {
-  /** Frame de `GoogleRankingVsl` affichée à `criteriaStart`. */
-  criteriaSeek: 361,
   /** Frame LOCALE de `ReviewCollectionProblem` affichée à `frictionStart`. */
   frictionSeek: 400,
   /** Frame de `GoogleRankingHook` où la fiche est stabilisée en 1re place. */
