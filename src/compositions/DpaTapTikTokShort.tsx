@@ -1,7 +1,7 @@
 /**
  * DpaTapTikTokShort — version courte (≈ 45 s) destinée à TikTok.
  *
- * Même modèle que `DpaTapFullVsl` : cinq scènes posées les unes après les
+ * Même modèle que `DpaTapFullVsl` : six scènes posées les unes après les
  * autres, chacune dans sa `<Sequence>`. Aucun timing n'est écrit ici — ils
  * viennent tous de `config/tiktokShort.ts`, exactement comme `DpaTapFullVsl`
  * lit les siens dans `config/voiceover.ts`.
@@ -65,14 +65,26 @@ const OpeningQuestion: React.FC = () => (
 );
 
 /**
+ * Parcours classique repris tel quel de la Full VSL : client satisfait,
+ * recherche Google, section des avis, rédaction puis avis publié.
+ */
+const ClassicJourney: React.FC = () => (
+  <AbsoluteFill style={{ backgroundColor: G.white }}>
+    <Sequence from={-SOURCE.classicJourneySeek}>
+      <ReviewCollectionProblem questionLead="Comment obtenir" />
+    </Sequence>
+  </AbsoluteFill>
+);
+
+/**
  * La conclusion « Presque aucun client… », sur fond blanc (elle n'a pas de fond
- * propre). `showJourney={false}` : le montage court a coupé la démonstration du
- * parcours classique, sa fin ne doit pas s'effacer par-dessus la conclusion.
+ * propre). Le parcours reste monté pendant son fondu de sortie, exactement
+ * comme dans `DpaTapFullVsl`.
  */
 const FrictionConclusion: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: G.white }}>
     <Sequence from={-SOURCE.frictionSeek}>
-      <ReviewCollectionProblem showJourney={false} />
+      <ReviewCollectionProblem />
     </Sequence>
   </AbsoluteFill>
 );
@@ -81,7 +93,7 @@ const FrictionConclusion: React.FC = () => (
 const FrictionConclusionEnd: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: G.white }}>
     <Freeze frame={PROBLEM_DURATION - 1}>
-      <ReviewCollectionProblem showJourney={false} />
+      <ReviewCollectionProblem />
     </Freeze>
   </AbsoluteFill>
 );
@@ -149,6 +161,14 @@ export const DpaTapTikTokShort: React.FC = () => {
         name="Question d'ouverture"
       >
         <OpeningQuestion />
+      </Sequence>
+
+      <Sequence
+        from={F.classicJourneyStart}
+        durationInFrames={F.classicJourneyEnd - F.classicJourneyStart}
+        name="Parcours classique pour laisser un avis"
+      >
+        <ClassicJourney />
       </Sequence>
 
       <Sequence
