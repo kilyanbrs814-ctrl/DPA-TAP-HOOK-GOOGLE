@@ -34,6 +34,7 @@ import {
   PROBLEM_DURATION,
   ReviewCollectionProblem,
 } from "../components/ReviewCollectionProblem";
+import { ShortNarrativeCaptions } from "../components/ShortNarrativeCaptions";
 import { DpaTapReelBlue } from "../dpa/DpaTapReelBlue";
 import { DpaSalesEndScene } from "./DpaSalesEndScene";
 import { GoogleRankingHook } from "./GoogleRankingHook";
@@ -221,6 +222,8 @@ export const DpaTapTikTokShort: React.FC = () => {
           incoming={<DpaSalesEndScene />}
         />
       </Sequence>
+
+      <ShortNarrativeCaptions />
     </AbsoluteFill>
   );
 };
