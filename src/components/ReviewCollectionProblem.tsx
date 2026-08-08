@@ -376,7 +376,12 @@ export const ReviewCollectionProblem: React.FC<{
    * reste, avec son entrée échelonnée intacte.
    */
   readonly showJourney?: boolean;
-}> = ({ showJourney = true }) => {
+  /**
+   * Première ligne de la question. La VSL complète conserve sa formulation
+   * historique par défaut ; le Short peut retirer « Mais » sans la modifier.
+   */
+  readonly questionLead?: string;
+}> = ({ showJourney = true, questionLead = "Mais comment obtenir" }) => {
   const frame = useCurrentFrame();
   const T = PROBLEM_TIMING;
   const demoFrame = frame - T.demoStart;
@@ -694,7 +699,7 @@ export const ReviewCollectionProblem: React.FC<{
               translate: `0px ${(1 - line1) * 24}px`,
             }}
           >
-            Mais comment obtenir
+            {questionLead}
           </div>
           <div
             style={{
