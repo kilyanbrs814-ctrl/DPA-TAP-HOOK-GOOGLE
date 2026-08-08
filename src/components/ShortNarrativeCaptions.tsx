@@ -10,6 +10,7 @@ import {
 } from "remotion";
 import { FONT_FAMILY } from "../config/fonts";
 import { G } from "../config/google-ui";
+import { StarsRating } from "./StarsRating";
 
 /** Seul texte ajouté au Short : la phrase de rupture de la voix off. */
 const TOO_LONG_CAPTION: Caption = {
@@ -53,6 +54,87 @@ const AnimatedPart: React.FC<{
   );
 };
 
+
+/** Question d’ouverture du Short, construite au rythme de la voix off. */
+export const OpeningQuestionWordByWord: React.FC = () => (
+  <AbsoluteFill
+    style={{
+      backgroundColor: G.white,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontFamily: FONT_FAMILY,
+      pointerEvents: "none",
+    }}
+  >
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        paddingLeft: 70,
+        paddingRight: 70,
+        boxSizing: "border-box",
+        textAlign: "center",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 22,
+          fontSize: 80,
+          fontWeight: 400,
+          color: G.textPrimary,
+          lineHeight: 1.18,
+          whiteSpace: "nowrap",
+        }}
+      >
+        <AnimatedPart revealFrame={0}>Comment</AnimatedPart>
+        <AnimatedPart revealFrame={5}>obtenir</AnimatedPart>
+      </div>
+
+      <div
+        style={{
+          marginTop: 14,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 20,
+          fontSize: 88,
+          fontWeight: 700,
+          color: G.textPrimary,
+          lineHeight: 1.18,
+          whiteSpace: "nowrap",
+        }}
+      >
+        <AnimatedPart revealFrame={10}>plus d’avis</AnimatedPart>
+        <AnimatedPart revealFrame={16}>
+          <span style={{ display: "inline-flex" }}>
+            {Array.from("Google").map((letter, index) => (
+              <span key={letter + index} style={{ color: G.logo[index] }}>
+                {letter}
+              </span>
+            ))}
+          </span>
+        </AnimatedPart>
+        <AnimatedPart revealFrame={22}>?</AnimatedPart>
+      </div>
+
+      <div style={{ marginTop: 48 }}>
+        <AnimatedPart revealFrame={28}>
+          <StarsRating
+            progress={5}
+            size={40}
+            gap={6}
+            idPrefix="short-question-stars"
+          />
+        </AnimatedPart>
+      </div>
+    </div>
+  </AbsoluteFill>
+);
 const TooLongPhrase: React.FC<{ readonly durationInFrames: number }> = ({
   durationInFrames,
 }) => {
