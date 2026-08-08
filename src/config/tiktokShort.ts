@@ -185,7 +185,13 @@ export const TIKTOK_SHORT_AUDIO = {
     },
     {
       name: "dpa",
-      shortStart: TIKTOK_SHORT.beats.plaqueVisualStart,
+      /**
+       * La voix DPA commence exactement après la fin de l'extrait « friction ».
+       * Elle ne suit pas `plaqueVisualStart` : cette scène visuelle peut être
+       * avancée sans faire démarrer deux voix off en même temps.
+       */
+      shortStart:
+        TIKTOK_SHORT.beats.frictionStart + (40.033333 - 32.7),
       sourceStart: 40.033333,
       sourceEnd: 61.233333,
     },
