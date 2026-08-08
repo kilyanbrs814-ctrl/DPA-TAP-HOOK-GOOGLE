@@ -35,30 +35,30 @@ const SCENE_BEATS = {
   classicJourneyEnd: 12.733333,
 
   frictionStart: 12.733333,
-  frictionEnd: 19.963333,
+  frictionEnd: 15.2,
 
   // ── Reel NFC : chaque ligne contrôle vraiment sa sous-scène ──
-  plaqueVisualStart: 19.963333, // transition vers la plaque
-  plaqueMoveStart: 23.133333, // la plaque quitte le centre
-  phoneStart: 23.933333, // entrée du téléphone
-  phoneContact: 26.733333, // contact NFC et ondes
-  notificationStart: 28.2, // apparition de la notification
-  notificationTap: 29.0, // pression sur la notification
-  safariStart: 29.166667, // ouverture de Safari dans l'iPhone
-  phoneCloseUpStart: 29.366667, // début du rapprochement de l'iPhone
-  phoneCloseUpEnd: 30.3, // iPhone arrivé en gros plan
-  pageOpenStart: 31.066667, // apparition de la page d'avis Google
-  reviewStart: 33.5, // page prête pour l'interaction
-  starsStart: 34.1, // première étoile sélectionnée
-  publishStart: 36.533333, // pression sur « Publier »
-  publishFlash: 36.666667, // flash de confirmation
-  successStart: 37.133333, // écran « +1 avis »
-  plaqueVisualEnd: 41.266667, // fin du reel sous le payoff
+  plaqueVisualStart: 15.2, // transition vers la plaque
+  plaqueMoveStart: 19.5, // la plaque quitte le centre
+  phoneStart: 20, // entrée du téléphone
+  phoneContact: 23, // contact NFC et ondes
+  notificationStart: 23, // apparition de la notification
+  notificationTap: 24, // pression sur la notification
+  safariStart: 25, // ouverture de Safari dans l'iPhone
+  phoneCloseUpStart: 25, // début du rapprochement de l'iPhone
+  phoneCloseUpEnd: 26, // iPhone arrivé en gros plan
+  pageOpenStart: 27, // apparition de la page d'avis Google
+  reviewStart: 28, // page prête pour l'interaction
+  starsStart: 28, // première étoile sélectionnée
+  publishStart: 29, // pression sur « Publier »
+  publishFlash: 29.5, // flash de confirmation
+  successStart: 30.5, // écran « +1 avis »
+  plaqueVisualEnd: 37, // fin du reel sous le payoff
 
   payoffStart: 32.033333,
-  payoffEnd: 41.266667,
+  payoffEnd: 37,
 
-  ctaStart: 41.266667,
+  ctaStart: 37,
   ctaEnd: 43.6,
 } as const;
 
