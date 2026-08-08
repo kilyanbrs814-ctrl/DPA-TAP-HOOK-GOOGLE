@@ -15,8 +15,8 @@ import {
   PHONE,
   REVIEW_PAGE,
   SPRINGS,
-  T,
 } from "./constants";
+import { useDpaTiming } from "./timing";
 
 /**
  * The "+1 avis" confirmation, rendered in the LOCAL coordinates of the phone
@@ -97,6 +97,7 @@ const ACCENTS = [
 export const PhoneSuccessScreen: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const T = useDpaTiming();
 
   const enter = spring({
     frame: frame - T.successStart,
