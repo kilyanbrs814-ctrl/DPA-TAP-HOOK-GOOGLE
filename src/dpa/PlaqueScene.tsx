@@ -9,8 +9,9 @@ import {
   useVideoConfig,
 } from "remotion";
 import type { Group } from "three";
-import { COLORS, HEIGHT, PLAQUE, SPRINGS, T, WIDTH } from "./constants";
+import { COLORS, HEIGHT, PLAQUE, SPRINGS, WIDTH } from "./constants";
 import { usePlaqueModel } from "./usePlaqueModel";
+import { type DpaTiming, useDpaTiming } from "./timing";
 
 /**
  * World units: the GLB is modelled in meters, so the plaque is 0.1 × 0.1 m and
@@ -37,7 +38,7 @@ const toWorldY = (px: number) => (HEIGHT / 2 - px) * PX_TO_WORLD;
  * moitié du chemin au moment où le fondu d'entrée la rendait visible, et on ne
  * la voyait jamais centrée.
  */
-export const plaqueAnchorAt = (frame: number) => ({
+export const plaqueAnchorAt = (frame: number, T: DpaTiming) => ({
   x: interpolate(
     frame,
     [T.hookStart, T.plaqueMove, T.contactStart, T.contact],
@@ -73,6 +74,7 @@ export const plaqueAnchorAt = (frame: number) => ({
 const Plaque: React.FC<{ readonly model: Group }> = ({ model }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const T = useDpaTiming();
 
   const enter = spring({
     frame: frame - T.hookStart,
@@ -90,7 +92,7 @@ const Plaque: React.FC<{ readonly model: Group }> = ({ model }) => {
   });
   const contactDip = interpolate(contactPush, [0, 0.5, 1], [0, -0.0035, 0]);
 
-  const anchor = plaqueAnchorAt(frame);
+  const anchor = plaqueAnchorAt(frame, T);
 
   return (
     <group
@@ -120,6 +122,7 @@ const Plaque: React.FC<{ readonly model: Group }> = ({ model }) => {
 export const PlaqueScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
+  const T = useDpaTiming();
   // Loaded here, above <ThreeCanvas>: while rendering, R3F only draws when the
   // Remotion frame changes, so the model has to exist before the canvas mounts.
   const model = usePlaqueModel();
