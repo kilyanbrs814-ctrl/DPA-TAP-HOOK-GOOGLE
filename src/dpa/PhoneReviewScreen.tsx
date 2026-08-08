@@ -16,11 +16,10 @@ import {
   REVIEW_PAGE,
   SCREEN,
   SPRINGS,
-  T,
   TRANSITION_FRAMES,
-  starFrame,
 } from "./constants";
 import { TapRing } from "./NfcWaves";
+import { starFrameAt, useDpaTiming } from "./timing";
 
 /**
  * Safari and the Google review page, rendered in the LOCAL coordinate system of
@@ -63,7 +62,8 @@ const BUTTON = {
 
 const FilledStar: React.FC<{ readonly index: number }> = ({ index }) => {
   const frame = useCurrentFrame();
-  const local = frame - starFrame(index);
+  const T = useDpaTiming();
+  const local = frame - starFrameAt(T, index);
 
   if (local < 0) {
     return null;
@@ -167,6 +167,7 @@ const SafariBar: React.FC<{
 export const PhoneReviewScreen: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const T = useDpaTiming();
 
   // Safari taking the screen: opacity + 0.97 → 1 + a short vertical settle and a
   // blur that clears immediately. Heavily damped, no overshoot, no wipe.
@@ -290,7 +291,7 @@ export const PhoneReviewScreen: React.FC = () => {
               key={index}
               x={toScreenX(REVIEW_PAGE.starCentersX[index])}
               y={toScreenY(REVIEW_PAGE.starCenterY)}
-              startFrame={starFrame(index)}
+              startFrame={starFrameAt(T, index)}
               size={STAR_TAP_SIZE}
             />
           ))}
