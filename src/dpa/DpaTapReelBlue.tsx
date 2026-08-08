@@ -3,6 +3,7 @@ import { AbsoluteFill } from "remotion";
 import { COLORS } from "./constants";
 import { Sfx } from "./Sfx";
 import { WorldStage } from "./WorldStage";
+import { DpaTimingProvider, type DpaTiming } from "./timing";
 
 /**
  * DPA TAP — Reel NFC, plaque bleue.
@@ -35,15 +36,20 @@ import { WorldStage } from "./WorldStage";
  * `DURATION_IN_FRAMES`. Sans lui, la plaque démarre sur la première frame de la
  * séquence et tous les timings `T.*` gardent leurs écarts relatifs.
  */
-export const DpaTapReelBlue: React.FC = () => {
+export const DpaTapReelBlue: React.FC<{
+  /** Omission = timeline historique de DpaTapFullVsl, strictement inchangée. */
+  readonly timing?: DpaTiming;
+}> = ({ timing }) => {
   return (
-    <AbsoluteFill style={{ backgroundColor: COLORS.stage }}>
-      {/*
-        One single physical stage for the whole reel — plaque, iPhone,
-        notification, Safari, the Google page and the "+1 avis" confirmation.
-      */}
-      <WorldStage />
-      <Sfx />
-    </AbsoluteFill>
+    <DpaTimingProvider timing={timing}>
+      <AbsoluteFill style={{ backgroundColor: COLORS.stage }}>
+        {/*
+          One single physical stage for the whole reel — plaque, iPhone,
+          notification, Safari, the Google page and the "+1 avis" confirmation.
+        */}
+        <WorldStage />
+        <Sfx />
+      </AbsoluteFill>
+    </DpaTimingProvider>
   );
 };
