@@ -9,7 +9,7 @@ import {
 } from "remotion";
 import { FONT_FAMILY } from "../config/fonts";
 import { G } from "../config/google-ui";
-import { ASSETS } from "../dpa/constants";
+import { ASSETS, COLORS } from "../dpa/constants";
 
 const WORDS = ["Visibilité", "Image en ligne", "Confiance"] as const;
 
@@ -191,14 +191,14 @@ export const CommerceVslEndScene: React.FC = () => {
       <div
         style={{
           position: "absolute",
-          top: 1142,
+          top: 1420,
           left: 0,
           right: 0,
           textAlign: "center",
-          fontSize: 34,
-          fontWeight: 500,
-          letterSpacing: -0.3,
-          color: G.textSecondary,
+          fontSize: 46,
+          fontWeight: 650,
+          letterSpacing: -0.6,
+          color: COLORS.dpaPurple,
           opacity: websiteProgress,
           translate: `0px ${(1 - websiteProgress) * 16}px`,
         }}
