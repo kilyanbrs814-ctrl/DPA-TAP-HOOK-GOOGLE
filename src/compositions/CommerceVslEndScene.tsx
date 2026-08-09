@@ -1,131 +1,167 @@
 import React from "react";
-import { AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
+import {
+  AbsoluteFill,
+  Easing,
+  Img,
+  interpolate,
+  Sequence,
+  staticFile,
+  useCurrentFrame,
+} from "remotion";
 import { FONT_FAMILY } from "../config/fonts";
 import { G } from "../config/google-ui";
 import { ASSETS } from "../dpa/constants";
+import { GoogleRankingHook } from "./GoogleRankingHook";
 
-const benefits = [
-  { label: "Visibilité", color: "#4285F4" },
-  { label: "Image en ligne", color: "#34A853" },
-  { label: "Confiance", color: "#FBBC05" },
-] as const;
+const EASE = Easing.bezier(0.22, 1, 0.36, 1);
 
-const reveal = (frame: number, from: number, to: number) =>
-  interpolate(frame, [from, to], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
+const WORDS = ["Visibilité", "Image en ligne", "Confiance"] as const;
 
+/**
+ * Conclusion dans le langage visuel de la référence : le vrai résultat Google
+ * arrivé en première position, trois mots simples, puis le vrai produit et le
+ * logo officiel DPA TAP. Aucun badge ou faux composant Google.
+ */
 export const CommerceVslEndScene: React.FC = () => {
   const frame = useCurrentFrame();
-  const product = reveal(frame, 0, 18);
-  const logo = reveal(frame, 72, 92);
+  const switchStart = 62;
+  const switchEnd = 80;
+  const pageX = interpolate(frame, [switchStart, switchEnd], [0, -1080], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: EASE,
+  });
+  const productX = interpolate(frame, [switchStart, switchEnd], [1080, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: EASE,
+  });
+  const productOpacity = interpolate(frame, [switchStart + 3, switchEnd], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   return (
-    <AbsoluteFill style={{ backgroundColor: G.white, fontFamily: FONT_FAMILY }}>
-      <div
+    <AbsoluteFill
+      style={{
+        backgroundColor: G.white,
+        fontFamily: FONT_FAMILY,
+        overflow: "hidden",
+      }}
+    >
+      <AbsoluteFill style={{ translate: `${pageX}px 0px` }}>
+        <Sequence from={-119}>
+          <GoogleRankingHook />
+        </Sequence>
+
+        <div
+          style={{
+            position: "absolute",
+            left: 48,
+            right: 48,
+            bottom: 64,
+            height: 112,
+            backgroundColor: "rgba(255,255,255,0.96)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 38,
+            borderTop: `1px solid ${G.border}`,
+            zIndex: 10,
+          }}
+        >
+          {WORDS.map((word, index) => {
+            const progress = interpolate(
+              frame,
+              [index * 8, index * 8 + 12],
+              [0, 1],
+              {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+                easing: EASE,
+              },
+            );
+
+            return (
+              <React.Fragment key={word}>
+                {index > 0 ? (
+                  <div
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      backgroundColor: G.textTertiary,
+                      opacity: progress,
+                    }}
+                  />
+                ) : null}
+                <div
+                  style={{
+                    fontSize: 31,
+                    fontWeight: 500,
+                    color: index === 0 ? G.actionBlue : G.textPrimary,
+                    opacity: progress,
+                    translate: `0px ${(1 - progress) * 14}px`,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {word}
+                </div>
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </AbsoluteFill>
+
+      <AbsoluteFill
         style={{
-          position: "absolute",
-          left: 70,
-          top: 118,
-          width: 940,
-          textAlign: "center",
-          fontSize: 66,
-          lineHeight: 1.12,
-          fontWeight: 500,
-          letterSpacing: -2.4,
-          color: G.textPrimary,
-          opacity: product,
-          transform: `translateY(${(1 - product) * 24}px)`,
+          translate: `${productX}px 0px`,
+          opacity: productOpacity,
+          backgroundColor: G.white,
         }}
       >
-        Faites de vos clients satisfaits
-        <br />
-        <span style={{ color: G.actionBlue }}>votre meilleur classement.</span>
-      </div>
+        <div
+          style={{
+            position: "absolute",
+            top: 176,
+            left: 0,
+            right: 0,
+            textAlign: "center",
+            fontSize: 56,
+            fontWeight: 500,
+            letterSpacing: -1.6,
+            color: G.textPrimary,
+          }}
+        >
+          Découvrez
+        </div>
 
-      <Img
-        src={staticFile(ASSETS.plaqueBluePng)}
-        style={{
-          position: "absolute",
-          width: 670,
-          height: 670,
-          objectFit: "contain",
-          left: 205,
-          top: 430,
-          opacity: product,
-          transform: `translateY(${(1 - product) * 34}px) scale(${0.94 + product * 0.06})`,
-        }}
-      />
+        <Img
+          src={staticFile(ASSETS.plaqueBluePng)}
+          style={{
+            position: "absolute",
+            left: 130,
+            top: 410,
+            width: 820,
+            height: 820,
+            objectFit: "contain",
+            maxWidth: "none",
+          }}
+        />
 
-      <div
-        style={{
-          position: "absolute",
-          left: 70,
-          right: 70,
-          top: 1160,
-          display: "flex",
-          gap: 18,
-        }}
-      >
-        {benefits.map((benefit, index) => {
-          const p = reveal(frame, 22 + index * 8, 36 + index * 8);
-          return (
-            <div
-              key={benefit.label}
-              style={{
-                flex: 1,
-                height: 112,
-                borderRadius: 24,
-                border: `2px solid ${benefit.color}38`,
-                backgroundColor: `${benefit.color}12`,
-                color: benefit.color === "#FBBC05" ? "#9A6B00" : benefit.color,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                textAlign: "center",
-                fontSize: 29,
-                fontWeight: 500,
-                opacity: p,
-                transform: `translateY(${(1 - p) * 18}px)`,
-              }}
-            >
-              {benefit.label}
-            </div>
-          );
-        })}
-      </div>
-
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 1450,
-          textAlign: "center",
-          fontSize: 44,
-          fontWeight: 500,
-          color: G.textPrimary,
-          opacity: logo,
-          transform: `translateY(${(1 - logo) * 18}px)`,
-        }}
-      >
-        Découvrez
-      </div>
-      <Img
-        src={staticFile(ASSETS.logo)}
-        style={{
-          position: "absolute",
-          left: 190,
-          top: 1390,
-          width: 700,
-          height: 467,
-          objectFit: "contain",
-          opacity: logo,
-          transform: `translateY(${(1 - logo) * 18}px)`,
-        }}
-      />
+        <Img
+          src={staticFile(ASSETS.logo)}
+          style={{
+            position: "absolute",
+            left: 150,
+            top: 1260,
+            width: 780,
+            height: 520,
+            objectFit: "contain",
+            maxWidth: "none",
+          }}
+        />
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 };

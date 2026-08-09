@@ -9,7 +9,7 @@ import { FONT_FAMILY } from "../config/fonts";
 import { CloseIcon, LensIcon, MicIcon, SearchIcon } from "./GoogleIcons";
 
 /** Logo "Google" lettre par lettre, aux couleurs officielles. */
-const GoogleLogo: React.FC<{ height: number }> = ({ height }) => (
+export const GoogleLogo: React.FC<{ height: number }> = ({ height }) => (
   <div
     style={{
       display: "flex",
