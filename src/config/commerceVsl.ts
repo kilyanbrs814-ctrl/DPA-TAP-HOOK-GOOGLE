@@ -41,9 +41,11 @@ export const COMMERCE_VSL_SECOND_VOICE_START =
   (COMMERCE_VSL.audio.existingDemoEnd -
     COMMERCE_VSL.audio.existingActionStart);
 
+/** Maintient le CTA seul pendant 2 secondes après la fin de la voix. */
 export const COMMERCE_VSL_DURATION =
   COMMERCE_VSL_SECOND_VOICE_START +
-  (COMMERCE_VSL.audio.newVoiceEnd - COMMERCE_VSL.audio.newVoiceSecondStart);
+  (COMMERCE_VSL.audio.newVoiceEnd - COMMERCE_VSL.audio.newVoiceSecondStart) +
+  frame(2);
 
 /** Timeline locale du reel DPA : le produit apparaît à 15,99 s. */
 export const COMMERCE_DPA_TIMING: DpaTiming = {
