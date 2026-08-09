@@ -5,6 +5,8 @@ import {
   COMMERCE_DPA_TIMING,
   COMMERCE_VSL,
   COMMERCE_VSL_DURATION,
+  COMMERCE_VSL_EXISTING_VOICE_START,
+  COMMERCE_VSL_SECOND_VOICE_START,
 } from "../config/commerceVsl";
 import { G } from "../config/google-ui";
 import { DpaTapReelBlue } from "../dpa/DpaTapReelBlue";
@@ -27,7 +29,7 @@ export const DpaTapCommerceVsl: React.FC = () => {
         />
       </Sequence>
       <Sequence
-        from={beats.demoStart}
+        from={COMMERCE_VSL_EXISTING_VOICE_START}
         durationInFrames={audio.existingDemoEnd - audio.existingActionStart}
         layout="none"
       >
@@ -39,7 +41,7 @@ export const DpaTapCommerceVsl: React.FC = () => {
         />
       </Sequence>
       <Sequence
-        from={beats.demoEnd}
+        from={COMMERCE_VSL_SECOND_VOICE_START}
         durationInFrames={audio.newVoiceEnd - audio.newVoiceSecondStart}
         layout="none"
       >
