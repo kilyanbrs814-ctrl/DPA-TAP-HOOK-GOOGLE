@@ -17,7 +17,14 @@ export const COMMERCE_VSL = {
     newVoiceFirstEnd: frame(20.2166),
     newVoiceSecondStart: frame(20.8809),
     newVoiceEnd: Math.ceil(25.626063 * COMMERCE_VSL_FPS),
-    existingDemoStart: frame(47.396),
+    /**
+     * L'attaque réelle de « le client approche son téléphone… » commence à
+     * 45,75 s. Le silence 47,411 → 47,900 est retiré au montage : toute la
+     * phrase est conservée sans rallonger la démonstration de 15 secondes.
+     */
+    existingLeadStart: frame(45.75),
+    existingLeadEnd: frame(47.4109),
+    existingActionStart: frame(47.8998),
     existingDemoEnd: frame(61.242),
   },
   beats: {
@@ -38,21 +45,22 @@ export const COMMERCE_VSL_DURATION =
 export const COMMERCE_DPA_TIMING: DpaTiming = {
   hookStart: 0,
   plaqueMove: 94,
-  contactStart: COMMERCE_VSL.beats.demoStart - COMMERCE_VSL.beats.productStart,
-  contact: 190,
-  notifStart: 190,
-  notifTap: 220,
-  notifExitStart: 239,
-  safariStart: 240,
-  pageStart: 280,
-  closeUpStart: 245,
-  closeUpEnd: 280,
-  reviewStart: 300,
-  starFirst: 320,
+  /** Téléphone et interface recalés après retrait du silence de 0,489 s. */
+  contactStart: 176,
+  contact: 260,
+  notifStart: 304,
+  notifTap: 328,
+  notifExitStart: 332,
+  safariStart: 333,
+  pageStart: 390,
+  closeUpStart: 339,
+  closeUpEnd: 367,
+  reviewStart: 463,
+  starFirst: 481,
   starStep: 2,
   starReact: 4,
-  publishTap: 380,
-  publishFlash: 395,
-  successStart: 410,
+  publishTap: 554,
+  publishFlash: 558,
+  successStart: 572,
   end: COMMERCE_VSL.beats.demoEnd - COMMERCE_VSL.beats.productStart,
 };

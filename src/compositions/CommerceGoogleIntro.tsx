@@ -131,16 +131,20 @@ const GoogleSearchOpening: React.FC = () => {
  * du projet. La caméra descend jusqu'à « Votre établissement », classé 4e,
  * puis revient au sommet avant la remontée : aucun composant inventé.
  */
-const GenuineLocalResults: React.FC = () => {
+const GenuineGoogleStory: React.FC = () => {
   const frame = useCurrentFrame();
   const start = COMMERCE_VSL.beats.questionStart;
-  const end = COMMERCE_VSL.beats.rankingStart;
+  const rankingStart = COMMERCE_VSL.beats.rankingStart;
   const local = frame - start;
-  const duration = end - start;
-  const opacity = fade(frame, start - 8, start + 4, end - 7, end + 3);
+  const questionDuration = rankingStart - start;
+  const opacity = interpolate(frame, [start - 8, start + 4], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: EASE,
+  });
   const pageY = interpolate(
     local,
-    [0, 22, 62, duration - 38, duration - 2],
+    [0, 22, 62, questionDuration - 38, questionDuration],
     [0, 0, -640, -640, 0],
     {
       extrapolateLeft: "clamp",
@@ -148,6 +152,8 @@ const GenuineLocalResults: React.FC = () => {
       easing: Easing.inOut(Easing.cubic),
     },
   );
+  const hookFrame =
+    frame < rankingStart ? 0 : Math.min(119, frame - rankingStart);
 
   return (
     <AbsoluteFill
@@ -158,34 +164,10 @@ const GenuineLocalResults: React.FC = () => {
       }}
     >
       <AbsoluteFill style={{ translate: `0px ${pageY}px` }}>
-        <Freeze frame={0}>
+        <Freeze frame={hookFrame}>
           <GoogleRankingHook />
         </Freeze>
       </AbsoluteFill>
-    </AbsoluteFill>
-  );
-};
-
-/**
- * La preuve : la vraie fiche Google reçoit ses avis, sa note monte et elle
- * dépasse réellement les trois résultats concurrents du composant validé.
- */
-const GenuineRankingClimb: React.FC = () => {
-  const frame = useCurrentFrame();
-  const start = COMMERCE_VSL.beats.rankingStart;
-  const local = Math.max(0, frame - start);
-  const hookFrame = Math.min(119, local);
-  const opacity = interpolate(frame, [start - 4, start + 5], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: EASE,
-  });
-
-  return (
-    <AbsoluteFill style={{ backgroundColor: G.white, opacity }}>
-      <Freeze frame={hookFrame}>
-        <GoogleRankingHook />
-      </Freeze>
     </AbsoluteFill>
   );
 };
@@ -197,10 +179,7 @@ export const CommerceGoogleIntro: React.FC = () => {
     <AbsoluteFill style={{ backgroundColor: G.white }}>
       <GoogleSearchOpening />
       {frame >= COMMERCE_VSL.beats.questionStart - 8 ? (
-        <GenuineLocalResults />
-      ) : null}
-      {frame >= COMMERCE_VSL.beats.rankingStart - 4 ? (
-        <GenuineRankingClimb />
+        <GenuineGoogleStory />
       ) : null}
     </AbsoluteFill>
   );
