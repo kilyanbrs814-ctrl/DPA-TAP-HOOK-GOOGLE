@@ -29,22 +29,6 @@ export const DpaTapCommerceVsl: React.FC = () => {
 
       <Sequence
         from={beats.demoStart}
-        durationInFrames={audio.existingLeadEnd - audio.existingLeadStart}
-        layout="none"
-      >
-        <Audio
-          src={staticFile(audio.existingVoice)}
-          trimBefore={audio.existingLeadStart}
-          trimAfter={audio.existingLeadEnd}
-          volume={1}
-        />
-      </Sequence>
-
-      <Sequence
-        from={
-          beats.demoStart +
-          (audio.existingLeadEnd - audio.existingLeadStart)
-        }
         durationInFrames={audio.existingDemoEnd - audio.existingActionStart}
         layout="none"
       >
