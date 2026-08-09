@@ -210,7 +210,7 @@ export const CommerceVslEndScene: React.FC = () => {
           translate: `0px ${(1 - websiteProgress) * 16}px`,
         }}
       >
-        digitalprojectagency.fr
+        DigitalProjectAgency.fr
       </div>
 
       <Img
