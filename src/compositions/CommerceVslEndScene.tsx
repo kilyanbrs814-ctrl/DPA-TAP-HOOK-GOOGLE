@@ -1,4 +1,5 @@
 import React from "react";
+import { loadFont as loadMontserrat } from "@remotion/google-fonts/Montserrat";
 import {
   AbsoluteFill,
   Easing,
@@ -12,6 +13,11 @@ import { G } from "../config/google-ui";
 import { ASSETS, COLORS } from "../dpa/constants";
 
 const WORDS = ["Visibilité", "Image en ligne", "Confiance"] as const;
+
+const { fontFamily: logoStyleFontFamily } = loadMontserrat("normal", {
+  weights: ["800"],
+  subsets: ["latin"],
+});
 
 const reveal = (frame: number, from: number, to: number) =>
   interpolate(frame, [from, to], [0, 1], {
@@ -195,8 +201,9 @@ export const CommerceVslEndScene: React.FC = () => {
           left: 0,
           right: 0,
           textAlign: "center",
+          fontFamily: logoStyleFontFamily,
           fontSize: 72,
-          fontWeight: 700,
+          fontWeight: 800,
           letterSpacing: -1.2,
           color: COLORS.dpaPurple,
           opacity: websiteProgress,
