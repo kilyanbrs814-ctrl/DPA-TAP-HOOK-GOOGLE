@@ -79,7 +79,7 @@ export const CommerceVslEndScene: React.FC = () => {
   const frame = useCurrentFrame();
   const titleProgress = reveal(frame, 0, 10);
   const plaqueProgress = reveal(frame, 5, 20);
-  const logoProgress = reveal(frame, 28, 42);
+  const logoProgress = reveal(frame, 4, 16);
 
   return (
     <AbsoluteFill
@@ -192,7 +192,7 @@ export const CommerceVslEndScene: React.FC = () => {
         style={{
           position: "absolute",
           left: 150,
-          top: 1260,
+          top: 88,
           width: 780,
           height: 520,
           objectFit: "contain",
