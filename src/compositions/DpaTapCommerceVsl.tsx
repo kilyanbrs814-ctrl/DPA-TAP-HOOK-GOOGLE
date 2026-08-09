@@ -26,7 +26,6 @@ export const DpaTapCommerceVsl: React.FC = () => {
           volume={1}
         />
       </Sequence>
-
       <Sequence
         from={beats.demoStart}
         durationInFrames={audio.existingDemoEnd - audio.existingActionStart}
@@ -39,7 +38,6 @@ export const DpaTapCommerceVsl: React.FC = () => {
           volume={1}
         />
       </Sequence>
-
       <Sequence
         from={beats.demoEnd}
         durationInFrames={audio.newVoiceEnd - audio.newVoiceSecondStart}
@@ -52,11 +50,12 @@ export const DpaTapCommerceVsl: React.FC = () => {
           volume={1}
         />
       </Sequence>
-
-      <Sequence durationInFrames={beats.productStart} name="Hook Google commerces">
+      <Sequence
+        durationInFrames={beats.productStart}
+        name="Hook Google commerces"
+      >
         <CommerceGoogleIntro />
       </Sequence>
-
       <Sequence
         from={beats.productStart}
         durationInFrames={beats.demoEnd - beats.productStart}
@@ -65,7 +64,6 @@ export const DpaTapCommerceVsl: React.FC = () => {
       >
         <DpaTapReelBlue timing={COMMERCE_DPA_TIMING} />
       </Sequence>
-
       <Sequence
         from={beats.demoEnd}
         durationInFrames={COMMERCE_VSL_DURATION - beats.demoEnd}
