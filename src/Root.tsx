@@ -11,6 +11,10 @@ import {
   DpaTapTikTokShort,
   TIKTOK_SHORT_DURATION,
 } from "./compositions/DpaTapTikTokShort";
+import {
+  COMMERCE_VSL_DURATION,
+  DpaTapCommerceVsl,
+} from "./compositions/DpaTapCommerceVsl";
 
 /** Paramètres imposés par le brief du hook. */
 export const HOOK = {
@@ -61,6 +65,14 @@ export const RemotionRoot: React.FC = () => {
         id="DpaTapTikTokShort"
         component={DpaTapTikTokShort}
         durationInFrames={TIKTOK_SHORT_DURATION}
+        fps={HOOK.fps}
+        width={HOOK.width}
+        height={HOOK.height}
+      />
+      <Composition
+        id="DpaTapCommerceVsl"
+        component={DpaTapCommerceVsl}
+        durationInFrames={COMMERCE_VSL_DURATION}
         fps={HOOK.fps}
         width={HOOK.width}
         height={HOOK.height}
