@@ -80,6 +80,7 @@ export const CommerceVslEndScene: React.FC = () => {
   const titleProgress = reveal(frame, 0, 10);
   const plaqueProgress = reveal(frame, 5, 20);
   const logoProgress = reveal(frame, 4, 16);
+  const websiteProgress = reveal(frame, 30, 42);
 
   return (
     <AbsoluteFill
@@ -185,6 +186,24 @@ export const CommerceVslEndScene: React.FC = () => {
             </React.Fragment>
           );
         })}
+      </div>
+
+      <div
+        style={{
+          position: "absolute",
+          top: 1142,
+          left: 0,
+          right: 0,
+          textAlign: "center",
+          fontSize: 34,
+          fontWeight: 500,
+          letterSpacing: -0.3,
+          color: G.textSecondary,
+          opacity: websiteProgress,
+          translate: `0px ${(1 - websiteProgress) * 16}px`,
+        }}
+      >
+        digitalprojectagency.fr
       </div>
 
       <Img
