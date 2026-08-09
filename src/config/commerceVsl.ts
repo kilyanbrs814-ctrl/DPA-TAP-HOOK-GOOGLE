@@ -31,8 +31,14 @@ export const COMMERCE_VSL = {
   },
 } as const;
 
+/** La voix finale démarre exactement après le dernier mot de la démonstration. */
+export const COMMERCE_VSL_SECOND_VOICE_START =
+  COMMERCE_VSL.beats.demoStart +
+  (COMMERCE_VSL.audio.existingDemoEnd -
+    COMMERCE_VSL.audio.existingActionStart);
+
 export const COMMERCE_VSL_DURATION =
-  COMMERCE_VSL.beats.demoEnd +
+  COMMERCE_VSL_SECOND_VOICE_START +
   (COMMERCE_VSL.audio.newVoiceEnd - COMMERCE_VSL.audio.newVoiceSecondStart);
 
 /** Timeline locale du reel DPA : le produit apparaît à 15,99 s. */
