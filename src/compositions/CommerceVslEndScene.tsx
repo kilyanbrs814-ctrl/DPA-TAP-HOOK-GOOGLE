@@ -59,21 +59,18 @@ export const CommerceVslEndScene: React.FC = () => {
             position: "absolute",
             left: 48,
             right: 48,
-            bottom: 64,
-            height: 112,
-            backgroundColor: "rgba(255,255,255,0.96)",
+            bottom: 230,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             gap: 38,
-            borderTop: `1px solid ${G.border}`,
             zIndex: 10,
           }}
         >
           {WORDS.map((word, index) => {
             const progress = interpolate(
               frame,
-              [index * 8, index * 8 + 12],
+              [index * 7, index * 7 + 16],
               [0, 1],
               {
                 extrapolateLeft: "clamp",
@@ -101,7 +98,12 @@ export const CommerceVslEndScene: React.FC = () => {
                     fontWeight: 500,
                     color: index === 0 ? G.actionBlue : G.textPrimary,
                     opacity: progress,
-                    translate: `0px ${(1 - progress) * 14}px`,
+                    translate: `0px ${(1 - progress) * 54}px`,
+                    scale: interpolate(progress, [0, 1], [0.92, 1], {
+                      extrapolateLeft: "clamp",
+                      extrapolateRight: "clamp",
+                    }),
+                    filter: `blur(${(1 - progress) * 10}px)`,
                     whiteSpace: "nowrap",
                   }}
                 >
