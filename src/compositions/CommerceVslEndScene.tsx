@@ -174,7 +174,7 @@ export const CommerceVslEndScene: React.FC = () => {
                   fontSize: 46,
                   fontWeight: 650,
                   letterSpacing: -0.7,
-                  color: index === 0 ? G.actionBlue : G.textPrimary,
+                  color: G.textPrimary,
                   opacity: progress,
                   translate: `0px ${(1 - progress) * 24}px`,
                   whiteSpace: "nowrap",
