@@ -63,7 +63,7 @@ export const CommerceVslEndScene: React.FC = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: 38,
+            gap: 26,
             zIndex: 10,
           }}
         >
@@ -94,8 +94,9 @@ export const CommerceVslEndScene: React.FC = () => {
                 ) : null}
                 <div
                   style={{
-                    fontSize: 31,
-                    fontWeight: 500,
+                    fontSize: 46,
+                    fontWeight: 650,
+                    letterSpacing: -0.7,
                     color: index === 0 ? G.actionBlue : G.textPrimary,
                     opacity: progress,
                     translate: `0px ${(1 - progress) * 54}px`,
